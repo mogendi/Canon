@@ -5,6 +5,7 @@
 #include "queue.h"
 #include <pthread.h>
 #include <signal.h>
+#include "Parser.h"
 
 /*
  *    Job Que
@@ -28,30 +29,25 @@
  * */
 
 // Monitor for threads trying to access the queue
-typedef  struct{
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
 
-}monitor;
+typedef struct thpool thpool_t;
+typedef struct threads_p threads;
 
 //Thread types
-typedef struct{
+struct threads_p{
     pthread_t threadid;
     int id;
     thpool_t* pool;
-}threads;
+};
 
-typedef struct{
+struct thpool{
     threads **thpool_arr; //Pointer to the array of threads
     queue* job_queue; //Pointer to the queue (Defined in core/queue.h)
     int working; // Number of working threads
     int alive; //Number of alive threads
     pthread_mutex_t poolmutex; //Mutex for the thread pools types
     pthread_cond_t cond; // Conditional variable to control pool activity
-}thpool_t;
-
-
-
+};
 
 //Return an initialized thpool array
 thpool_t* pool_init(int size, queue* jobQ);
@@ -60,7 +56,12 @@ thpool_t* pool_init(int size, queue* jobQ);
 static int thinit(thpool_t* pool, threads** thread_p, int id);
 
 //Assigns a request to a thread from a queue "Dispatcher"
-int assign_th(request_t* Req);
+int work(threads** threadp);
+/*
+ * The threads are active, they'll dequeue the work pool
+ * and call parse(HTTP MSG PARSE) on them
+ * TODO Make thread "work" function agnostic
+ * */
 
 //Destroys the entire pool
 void destroy_pool(thpool_t* tpool);

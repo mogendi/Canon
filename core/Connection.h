@@ -11,8 +11,6 @@
 #define RECV 0
 #define SEND 1
 
-
-
 /*
  * HTTP connection semantics(RFC 7230:50) and HTTP/TLS not implemented
  * */
@@ -35,8 +33,8 @@ void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
     }
 }
 
-
-void HTTPConnectionGen(int PORT){
+//returns an integer socket_fd bound to an address
+int HTTPConnectionGen(int PORT){
     int connection, opt = 1;
     struct sockaddr_in conn_addr;
 
@@ -55,6 +53,8 @@ void HTTPConnectionGen(int PORT){
 
     if (listen(connection, 4) < 0)
         perror("FAILED LISTEN");
+
+    return connection; // more like connection channel
 }
 
 

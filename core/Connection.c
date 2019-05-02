@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "Parser.h"
 #include "request.h"
-#include "canon_tpool.c"
+#include "canon_tpool.h"
 #include <sys/time.h>
 #include <sys/select.h>
 
