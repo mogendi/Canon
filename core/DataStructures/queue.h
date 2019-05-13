@@ -3,12 +3,14 @@
 #include "request.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "Engine/mutex.h"
+#include "../mutex.h"
 
-typedef struct{
+typedef struct node_p node;
+
+struct node_p{
     request_t *Req;
-    struct node* next;
-}node;
+    node* next;
+};
 
 typedef struct{
     node *Head;

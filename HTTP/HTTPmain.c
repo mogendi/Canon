@@ -20,7 +20,7 @@ int main(){
     while(1){
         if(listen(channel.sock_fd,4)<0)
             printf("failed listen");
-        if( (port_c = accept(channel.sock_fd, (struct sockaddr *)channel.port, &port_l)) <0 )
+        if( (port_c = accept(channel.sock_fd, (struct sockaddr *)&channel.port, &port_l)) <0 )
             perror("Failed Accept");
         request_t* vrequest = createRequest(NULL, NULL, NULL, NULL, NULL, NULL, port_c);
         Enqueue(vrequest, Q);

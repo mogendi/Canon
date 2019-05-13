@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "DataStructures/hashmap.h"
+#include "hashmap.h"
 
 struct request
 {

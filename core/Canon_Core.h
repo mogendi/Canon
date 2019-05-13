@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "queue.h"
-#include "canon_tpool.h"
+#include "DataStructures/queue.h"
+#include "Engine/canon_tpool.h"
 #include "Connection.h"
 
 #endif //CANON_CANON_CORE_H

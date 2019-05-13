@@ -4,10 +4,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "hashmap.h"
-#include "request.h"
+#include "DataStructures/hashmap.h"
+#include "DataStructures/request.h"
 #include <unistd.h>
-#include "logger.h"
+#include "FileOps/logger.h"
 
 void KeyValueDerive(char *HeaderLine,char *Key,char *Value){
     int i = 0, j = 0;

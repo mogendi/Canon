@@ -7,7 +7,7 @@
 
 #include <sys/socket.h>
 #include<netinet/in.h>
-#include "request.h"
+#include "DataStructures/request.h"
 #define RECV 0
 #define SEND 1
 
@@ -15,6 +15,12 @@
  * HTTP connection semantics(RFC 7230:50) and HTTP/TLS not implemented
  * */
 
+struct sock_p{
+    int sock_fd;
+    struct sockaddr_in port;
+};
+
+typedef struct sock_p sock;
 //Low level message transfer function. Expects data in its
 //proper format.
 void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
@@ -34,7 +40,7 @@ void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
 }
 
 //returns an integer socket_fd bound to an address
-int HTTPConnectionGen(int PORT){
+sock HTTPConnectionGen(int PORT){
     int connection, opt = 1;
     struct sockaddr_in conn_addr;
 
@@ -51,10 +57,11 @@ int HTTPConnectionGen(int PORT){
     if(bind(connection, (const struct sockaddr *)&conn_addr, sizeof(conn_addr))<0)
         perror("BIND FAILED");
 
-    if (listen(connection, 4) < 0)
-        perror("FAILED LISTEN");
+    sock conn;
+    conn.sock_fd = connection;
+    conn.port = conn_addr;
 
-    return connection; // more like connection channel
+    return conn; // more like connection channel
 }
 
 

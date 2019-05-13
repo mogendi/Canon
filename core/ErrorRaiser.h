@@ -4,7 +4,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<sys/socket.h>
-#include "request.h"
+#include "DataStructures/request.h"
 
 void CloseConnection(request_t *Request){
     //

@@ -1,8 +1,8 @@
 #ifndef CANON_TPOOL_H_INCLUDED
 #define CANON_TPOOL_H_INCLUDED
 
-#include "request.h"
-#include "queue.h"
+#include "../DataStructures/request.h"
+#include "../DataStructures/queue.h"
 #include <pthread.h>
 #include <signal.h>
 #include "Parser.h"
@@ -56,7 +56,7 @@ thpool_t* pool_init(int size, queue* jobQ);
 static int thinit(thpool_t* pool, threads** thread_p, int id);
 
 //Assigns a request to a thread from a queue "Dispatcher"
-int work(threads** threadp);
+void work(threads** thread_p);
 /*
  * The threads are active, they'll dequeue the work pool
  * and call parse(HTTP MSG PARSE) on them

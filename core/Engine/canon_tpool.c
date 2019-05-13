@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/signal.h>
 #include "canon_tpool.h"
-#include "mutex.h"
+#include "../mutex.h"
 
 /*                        GENERAL POOL FUNCTIONS
 ------------------------------------------------------------------------------------*/
@@ -54,6 +54,10 @@ thpool_t* pool_init(int size, queue* jobQ){
 /*                            THREAD SPECIFIC FUNCTIONS
   ------------------------------------------------------------------------------------ */
 
+
+//Prototypes
+void handler(int sig, threads** threads_p);
+
 //Initializes threads 'types' builds the signal handler
 static int thinit(thpool_t* pool, threads** threads_p, int id){
     *threads_p = (threads *)malloc(sizeof(threads));
@@ -62,7 +66,7 @@ static int thinit(thpool_t* pool, threads** threads_p, int id){
     (*threads_p)->pool = pool;
     (*threads_p)->id = id;
 
-    pthread_create(&(*threads_p)->threadid, NULL, (void *)threadfluff, (*threads_p));
+    pthread_create(&(*threads_p)->threadid, NULL, (void *)work, (*threads_p));
     struct sigaction handle;
     sigemptyset(&handle.sa_mask);
     handle.sa_flags = 0;
@@ -71,9 +75,9 @@ static int thinit(thpool_t* pool, threads** threads_p, int id){
         printf("Fatal Error: Cant build the signal handler");
         return -1;
     }
-    pthread_mutex_lock(thread_p->pool->poolmutex);
-    thread_p->pool->alive += 1; //increment the alive threads
-    pthread_mutex_unlock(thread_p->pool->poolmutex);
+    pthread_mutex_lock(&((*threads_p)->pool->poolmutex));
+    (*threads_p)->pool->alive += 1; //increment the alive threads
+    pthread_mutex_unlock(&((*threads_p)->pool->poolmutex));
     return 0;
 }
 
@@ -98,9 +102,9 @@ void work(threads** threads_p){
 //Kills the threads on SIGUSR1
 void handler(int sig, threads** threads_p){
     if(sig==SIGUSR1){
-        pthread_mutex_lock(thread_p->pool->poolmutex);
-        thread_p->pool->alive -= 1;
-        pthread_mutex_unlock(thread_p->pool->poolmutex);
+        pthread_mutex_lock(&(*threads_p)->pool->poolmutex);
+        (*threads_p)->pool->alive -= 1;
+        pthread_mutex_unlock(&(*threads_p)->pool->poolmutex);
         free(threads_p);
     }
 }
