@@ -27,7 +27,7 @@ void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
     char recv_buff[1024];
     if(Flag == RECV){
         recv(Req->sockfd, recv_buff, sizeof(recv_buff),0);
-        Req->MSG = buff;
+        Req->MSG = recv_buff;
     }
 
     if(Flag == SEND) {

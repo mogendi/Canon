@@ -7,10 +7,20 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
-add_library(engine ./core/Engine/canon_tpool.c)
+file(GLOB SRC1 ./core/DataStructures/*.c)
+file(GLOB SRC2 ./core/Engine/*.c)
+file(GLOB SRC3 ./core/FileOps/*.c)
+file(GLOB SRC4 ./core/*.c)
+file(GLOB SRC5 ./HTTP/*.c)
+
+file(GLOB INC1 ./core/DataStructures/*.h)
+file(GLOB INC2 ./core/Engine/*.h)
+file(GLOB INC3 ./core/FileOps/*.h)
+file(GLOB INC4 ./core/*.h)
+file(GLOB INC5 ./HTTP/*.h)
 
 include_directories(./core)
 include_directories(./HTTP)
-add_executable(canon ./HTTP/HTTPmain.c core/DataStructures/bst.h)
+add_executable(canon ./HTTP/HTTPmain.c ${SRC1} ${SRC2} ${SRC3} ${SRC4} ${SRC5}
+                                       ${INC1} ${INC2} ${INC3} ${INC4} ${INC5})
 
-target_link_libraries(canon engine)

@@ -6,13 +6,19 @@
  * Implementation of the parsing logic
  * */
 
-#include "Canon_Core.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/sysinfo.h>
+#include "DataStructures/queue.h"
+#include "Engine/canon_tpool.h"
+#include "DataStructures/request.h"
+#include "mutex.h"
+#include "Connection.h"
 
 int main(){
     int work_pool_size = get_nprocs(), port_c;
     queue* Q = CreateQ();
-    thpool_t* pool = pool_init((work_pool_size*8),Q);
+    thpool_t* pool = pool_init((work_pool_size),Q);
 
 
     sock channel = HTTPConnectionGen(8080);
@@ -23,7 +29,8 @@ int main(){
         if( (port_c = accept(channel.sock_fd, (struct sockaddr *)&channel.port, &port_l)) <0 )
             perror("Failed Accept");
         request_t* vrequest = createRequest(NULL, NULL, NULL, NULL, NULL, NULL, port_c);
-        Enqueue(vrequest, Q);
-        break;
+        HTTPMsgTransfer(vrequest,0,NULL);
+        node* n = CreateNode(vrequest, NULL);
+        Enqueue(n, Q);
     }
 }

@@ -1,8 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/signal.h>
 #include "canon_tpool.h"
+#include "../DataStructures/queue.h"
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "Parser.h"
 #include "../mutex.h"
+
+/*                        TYPE IMPLEMENTATIONS
+------------------------------------------------------------------------------------*/
+
+struct threads_p{
+    pthread_t threadid;
+    int id;
+    thpool_t* pool;
+};
+
+struct thpool{
+    threads **thpool_arr; //Pointer to the array of threads
+    queue* job_queue; //Pointer to the queue (Defined in core/queue.h)
+    int working; // Number of working threads
+    int alive; //Number of alive threads
+    pthread_mutex_t poolmutex; //Mutex for the thread pools types
+    pthread_cond_t cond; // Conditional variable to control pool activity
+};
+
+struct jobq_p{
+    queue* Q;
+};
+
 
 /*                        GENERAL POOL FUNCTIONS
 ------------------------------------------------------------------------------------*/
@@ -26,14 +51,17 @@ thpool_t* pool_init(int size, queue* jobQ){
     pool->thpool_arr = (threads**)malloc(size * sizeof(threads));
     if(pool->thpool_arr == NULL){
         printf("Fatal init error: Thread pool startup");
-        destroy_pool(pool);
         free(pool);
     }
+
     for(loopv = 0; loopv<size; loopv++){
-        thinit(pool, &(pool->thpool_arr[loopv]), loopv);
+        thinit(pool, &(pool)->thpool_arr[loopv], loopv);
     }
 
-    while(pool->working!=size){
+    pthread_mutex_init(&(pool->poolmutex), NULL);
+    pthread_cond_init(&(pool->cond),NULL);
+
+    while(pool->alive!=size){
         /*
          * Wait for the threads to start up to avoid
          * inconsistencies when assigning jobs
@@ -43,8 +71,6 @@ thpool_t* pool_init(int size, queue* jobQ){
     }
 
     /* Initialize access locks for the pool */
-    pthread_mutex_init(&(pool->poolmutex), NULL);
-    pthread_cond_init(&(pool->cond),NULL);
 
     return pool;
 
@@ -65,36 +91,33 @@ static int thinit(thpool_t* pool, threads** threads_p, int id){
         return -1;
     (*threads_p)->pool = pool;
     (*threads_p)->id = id;
+    printf("%d", id);
+    fflush(stdout);
 
     pthread_create(&(*threads_p)->threadid, NULL, (void *)work, (*threads_p));
-    struct sigaction handle;
-    sigemptyset(&handle.sa_mask);
-    handle.sa_flags = 0;
-    handle.sa_handler = handler;
-    if(sigaction(SIGUSR1, &handle, NULL) == -1) {
-        printf("Fatal Error: Cant build the signal handler");
-        return -1;
-    }
-    pthread_mutex_lock(&((*threads_p)->pool->poolmutex));
-    (*threads_p)->pool->alive += 1; //increment the alive threads
-    pthread_mutex_unlock(&((*threads_p)->pool->poolmutex));
+    pthread_detach((*threads_p)->threadid);
     return 0;
 }
 
-void work(threads** threads_p){
+void work(threads* threads_p){
     /*
      * Assumes an initialized work queue
      * and monitor
      * */
 
     /*Wait for the queue to be populated*/
-    condwait((*threads_p)->pool->job_queue->qlock);
 
-    pthread_mutex_lock(&(*threads_p)->pool->poolmutex);
-    (*threads_p)->pool->working += 1;
-    pthread_mutex_unlock(&(*threads_p)->pool->poolmutex);
+    pthread_mutex_lock(&(threads_p)->pool->poolmutex);
+    threads_p->pool->alive += 1; //increment the alive threads
+    pthread_mutex_unlock(&(threads_p)->pool->poolmutex);
 
-    node* req = Dequeue((*threads_p)->pool->job_queue);
+    condwait(threads_p->pool->job_queue->qlock);
+
+    pthread_mutex_lock(&(threads_p)->pool->poolmutex);
+    (threads_p)->pool->working += 1;
+    pthread_mutex_unlock(&(threads_p)->pool->poolmutex);
+
+    node* req = Dequeue((threads_p)->pool->job_queue);
     HTTPMsgParse(req->Req); /*The parse invokes the response builder*/
 
 }
