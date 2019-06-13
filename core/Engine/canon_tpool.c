@@ -21,7 +21,7 @@ int THPOOL_ALIVE = 1;
 //Creates threads ie; populates the thread pool
 static int thinit(thpool_t* pool, threads** threads_p, int id);
 //Kills threads
-int thkill(threads* thread_p);
+void thkill(threads* thread_p);
 //Spurs up the threads functionality
 void work(threads* thread_p);
 
