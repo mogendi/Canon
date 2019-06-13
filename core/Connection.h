@@ -6,7 +6,8 @@
 #define CANON_CONNECTION_H
 
 #include <sys/socket.h>
-#include<netinet/in.h>
+#include <netinet/in.h>
+#include <string.h>
 #include "DataStructures/request.h"
 #define RECV 0
 #define SEND 1
@@ -25,9 +26,14 @@ typedef struct sock_p sock;
 //proper format.
 void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
     char recv_buff[1024];
+    ssize_t buffsize;
     if(Flag == RECV){
-        recv(Req->sockfd, recv_buff, sizeof(recv_buff),0);
-        Req->MSG = recv_buff;
+        buffsize = recv(Req->sockfd, recv_buff, sizeof(recv_buff), 0);
+        if (buffsize == 0 || buffsize == -1) {
+        }
+        if (buffsize > 0) {
+            Req->MSG = recv_buff;
+        }
     }
 
     if(Flag == SEND) {

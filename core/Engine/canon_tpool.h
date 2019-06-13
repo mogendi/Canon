@@ -34,21 +34,10 @@ typedef struct threads_p threads;
 //Return an initialized thpool array
 thpool_t* pool_init(int size, queue* jobQ);
 
-//Creates threads ie; populates the thread pool
-static int thinit(thpool_t* pool, threads** thread_p, int id);
-
-//Assigns a request to a thread from a queue "Dispatcher"
-void work(threads* thread_p);
-/*
- * The threads are active, they'll dequeue the work pool
- * and call parse(HTTP MSG PARSE) on them
- * TODO Make thread "work" function agnostic
- * */
-
 //Destroys the entire pool
-void destroy_pool(thpool_t* tpool);
+void pool_kill(thpool_t* tpool);
 
-//Polls for any working threads, return int array of all non working arrays
+//Polls for any working threads, return int array of all non working threads
 int* poll(thpool_t* tpool);
 
 //Pauses threads, un-pauses if they're all paused

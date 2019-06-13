@@ -31,6 +31,8 @@ void Enqueue(node *new_n,queue *Q);
 
 node* Dequeue(queue *Q);
 
+int destroy_q(queue* Q);
+
 //Read operation, doesn't require mutually exclusive access
 node* peek(queue *Q);
 

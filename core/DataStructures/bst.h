@@ -7,6 +7,10 @@
 
 #include "request.h"
 #include "mutex.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <limits.h>
 
 /*
  * Standard BST API where protocols can use the structure

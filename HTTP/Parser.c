@@ -22,14 +22,14 @@ void KeyValueDerive(char *HeaderLine,char *Key,char *Value){
         x = HeaderLine[i];
     }
 
-    Key[i] = NULL;
+    Key[i] = '\0';
     i = i+2;
     while(x!='\0'){
         Value[j] = HeaderLine[i];
         j++;i++;
         x = HeaderLine[i];
     }
-    Value[j] = NULL;
+    Value[j] = '\0';
     i=0;j=0;
 }
 
@@ -42,8 +42,8 @@ void URLParse(request_t *Req){
 }
 
 void HeaderDeriver(request_t *Req, char* EditableMsg){
-    char delim[] = "\r\n";
-    int Size = getpagesize();
+    const char delim[] = "\r\n";
+    const int Size = getpagesize()/8;
     hashtable_t *HeaderFields = ht_create(Size/2);
 
     char *req_line = strtok(EditableMsg, delim);//Request Line
@@ -56,13 +56,12 @@ void HeaderDeriver(request_t *Req, char* EditableMsg){
 
     if(hf == NULL || (strcmp(hf, ""))==0){
         //ErrorRaiser(400, BWS);
-        printf("\nTrue\n");
+        printf("\nEmpty Message: Exiting Parse\n");
+        return;
     }
     char field[30], hvalue[120];
     KeyValueDerive(hf, field, hvalue);
 
-    if(hf == NULL)
-        printf("NULL Value");
     while((hf = strtok(NULL, delim)) != NULL){
         if(strcmp(hf, "\177")==0)
             break;

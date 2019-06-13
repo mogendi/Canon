@@ -33,4 +33,5 @@ int main(){
         node* n = CreateNode(vrequest, NULL);
         Enqueue(n, Q);
     }
+    pool_kill(pool);
 }
