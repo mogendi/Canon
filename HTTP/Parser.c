@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "DataStructures/hashmap.h"
 #include <unistd.h>
-#include "FileOps/logger.h"
+#include "logger.h"
 
 void KeyValueDerive(char *HeaderLine,char *Key,char *Value){
     int i = 0, j = 0;
@@ -81,6 +81,18 @@ void HTTPMsgParse(request_t* Req){
         kill_Req(Req);
         return;
     }
+
     char *EditableMSG = strdup(Req->MSG);
+    int size = 0; char c;
+    while(c != '\0') {
+        c = EditableMSG[size];
+        size++;
+    }
+    if(size <= 0 || EditableMSG == NULL) {
+        printf("Size: %d\n", size);
+        printf("strdup() failed");
+        fflush(stdout);
+    }
+
     HeaderDeriver(Req, EditableMSG);
 }

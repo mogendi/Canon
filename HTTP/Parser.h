@@ -3,8 +3,6 @@
 
 #include "DataStructures/request.h"
 
-void KeyValueDerive(char *HeaderLine,char *Key,char *Value);
-
 void URLParse(request_t *Req);
 
 void HeaderDeriver(request_t *Req, char* EditableMsg);

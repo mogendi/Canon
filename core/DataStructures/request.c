@@ -17,6 +17,7 @@ request_t *createRequest(char *MSGi, char *method, char *URL, char *req, hashtab
     reql->Headers = hmap;
     reql->body = body;
     reql->sockfd = sock_fd;
+    reql->secs = time(NULL)%3600;
     return reql;
 }
 
@@ -27,4 +28,9 @@ void kill_Req(request_t* reql){
         ht_destroy(reql->Headers);
     }
     free(reql);
+}
+
+int comp_req(request_t* reql){
+
+
 }

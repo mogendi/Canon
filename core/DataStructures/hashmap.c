@@ -8,6 +8,29 @@
 #include <string.h>
 #include "hashmap.h"
 
+
+/*          TYPE IMPLEMENTATIONS & PROTOTYPES
+ * -------------------------------------------------*/
+
+struct entry_s {
+    char *key;
+    char *value;
+    struct entry_s *next;
+};
+
+struct hashtable_s {
+    int size;
+    struct entry_s **table;
+};
+
+// Hash a string for a particular hash table.
+int ht_hash( hashtable_t *hashtable, char *key );
+
+// Create a key-value pair.
+entry_t *ht_newpair( char *key, char *value );
+
+
+
 // Create a new hashtable.
 hashtable_t *ht_create( int size ) {
 
@@ -151,4 +174,9 @@ void ht_destroy(hashtable_t *hashmap){
     }
     free(hashmap->table);
     free(hashmap);
+}
+
+int ht_compare(hashtable_t *hashmapl, hashtable_t *hashmapr){
+
+
 }

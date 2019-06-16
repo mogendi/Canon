@@ -30,6 +30,7 @@ void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
     if(Flag == RECV){
         buffsize = recv(Req->sockfd, recv_buff, sizeof(recv_buff), 0);
         if (buffsize == 0 || buffsize == -1) {
+            printf("Corrupt Request");
         }
         if (buffsize > 0) {
             Req->MSG = recv_buff;
