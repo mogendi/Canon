@@ -22,6 +22,6 @@ request_t *createRequest(char *MSGi, char *method, char *URL, char *req, hashtab
 
 void kill_Req(request_t* reql);
 
-int comp_req(request_t* reql);
+int comp_req(request_t* reql, request_t* reqr);
 
 #endif // REQUEST_H_INCLUDED

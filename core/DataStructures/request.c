@@ -7,7 +7,7 @@
 #include <string.h>
 
 request_t *createRequest(char *MSGi, char *method, char *URL, char *req, hashtable_t *hmap, char *body, int sock_fd){
-    request_t *reql = malloc(sizeof(request_t));
+    request_t *reql = (request_t*)malloc(sizeof(request_t));
     if(reql == NULL){
         printf("MALLOC failed\n");
         return NULL;
@@ -30,7 +30,12 @@ void kill_Req(request_t* reql){
     free(reql);
 }
 
-int comp_req(request_t* reql){
+int comp_req(request_t* reql, request_t* reqr){
 
+    int rl_flag = strcmp(reql->req_line, reqr->req_line);
+    int ht_flag = ht_compare(reql->Headers, reqr->Headers);
 
+    if(rl_flag == 0 && ht_flag == 0) {
+        return 0;
+    } else { return 1; }
 }

@@ -73,6 +73,7 @@ void HeaderDeriver(request_t *Req, char* EditableMsg){
 }
 
 void HTTPMsgParse(request_t* Req){
+    (request_t*)Req;
     if(strlen(Req->MSG)==0){
         /* Supposed to return a bad request response
          * Unimplemented as of now
@@ -83,14 +84,14 @@ void HTTPMsgParse(request_t* Req){
     }
 
     char *EditableMSG = strdup(Req->MSG);
-    int size = 0; char c;
+    int size = 0; char c = 'a';
     while(c != '\0') {
         c = EditableMSG[size];
         size++;
     }
     if(size <= 0 || EditableMSG == NULL) {
         printf("Size: %d\n", size);
-        printf("strdup() failed");
+        printf("\n\t strdup() failed \n");
         fflush(stdout);
     }
 

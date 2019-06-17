@@ -177,6 +177,18 @@ void ht_destroy(hashtable_t *hashmap){
 }
 
 int ht_compare(hashtable_t *hashmapl, hashtable_t *hashmapr){
+    int loopv, sl_value;
 
+    if(hashmapl->size < hashmapr->size)
+        sl_value = hashmapl->size;
+    else{sl_value = hashmapr->size;}
+
+    for(loopv = 0; loopv<sl_value; loopv++ ) {
+        if(strcmp(hashmapl->table[loopv]->value, hashmapr->table[loopv]->value) !=0 ){
+            return 1;
+        }
+    }
+
+    return 0;
 
 }

@@ -14,11 +14,12 @@
 #include "DataStructures/request.h"
 #include "mutex.h"
 #include "Connection.h"
+#include "Parser.h"
 
 int main(){
     int work_pool_size = get_nprocs(), port_c;
     queue* Q = CreateQ();
-    thpool_t* pool = pool_init((work_pool_size),Q);
+    thpool_t* pool = pool_init((work_pool_size),Q, HTTPMsgParse);
 
 
     sock channel = HTTPConnectionGen(8080);
@@ -30,8 +31,7 @@ int main(){
             perror("Failed Accept");
         request_t* vrequest = createRequest(NULL, NULL, NULL, NULL, NULL, NULL, port_c);
         HTTPMsgTransfer(vrequest,0,NULL);
-        node* n = CreateNode(vrequest, NULL);
-        Enqueue(n, Q);
+        Enqueue(vrequest, Q);
     }
     pool_kill(pool);
 }

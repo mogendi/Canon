@@ -34,7 +34,9 @@ queue* CreateQ(){
     return new_q;
 }
 
-void Enqueue(node *new_n,queue *Q){
+void Enqueue(request_t *Req,queue *Q){
+    node* new_n = CreateNode(Req, NULL);
+
     if(Q == NULL)
         Q = CreateQ();
     int flag=0;

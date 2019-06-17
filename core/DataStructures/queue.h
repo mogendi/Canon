@@ -27,7 +27,7 @@ queue* CreateQ();
 /*
  * Ensure the Q and New node are not null
  * */
-void Enqueue(node *new_n,queue *Q);
+void Enqueue(request_t* Req,queue *Q);
 
 node* Dequeue(queue *Q);
 

@@ -17,7 +17,7 @@ void PrintLog(request_t *Req)
     tm_info = localtime(&timer);
 
     strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
-    printf("[%s] %s %s\n", buffer, Req->method, Req->URL);
+    printf("[%s] %s\n", buffer, Req->req_line);
 }
 
 void Log(request_t *Req){

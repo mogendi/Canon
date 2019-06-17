@@ -42,7 +42,7 @@ void toggle_monitor(monitor *m, int val){
     pthread_mutex_lock(&m->lock);
     m->val = val;
     if(val == 1)
-        pthread_cond_broadcast(&m->cond);
+        pthread_cond_signal(&m->cond);
     pthread_mutex_unlock(&m->lock);
 }
 

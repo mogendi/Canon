@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "Parser.h"
 #include "../mutex.h"
 
 
@@ -33,7 +32,8 @@ struct threads_p{
 
 struct thpool{
     threads **thpool_arr; //Pointer to the array of threads
-    queue* job_queue; //Pointer to the queue (Defined in core/queue.h)
+    queue* job_queue; //Pointer to the queue (Defined in core/Data structures/queue.h)
+    callback work_f;
     int working; // Number of working threads
     int alive; //Number of alive threads
     pthread_mutex_t poolmutex; //Mutex for the thread pools types
@@ -44,7 +44,7 @@ struct thpool{
 /*                        GENERAL POOL FUNCTIONS
 ------------------------------------------------------------------------------------*/
 
-thpool_t* pool_init(int size, queue* jobQ){
+thpool_t* pool_init(int size, queue* jobQ, callback f){
 
     int loopv;
 
@@ -70,6 +70,8 @@ thpool_t* pool_init(int size, queue* jobQ){
     for(loopv = 0; loopv<size; loopv++){
         thinit(pool, &(pool)->thpool_arr[loopv], loopv);
     }
+
+    pool->work_f = f;
 
     pthread_mutex_init(&(pool->poolmutex), NULL);
     pthread_cond_init(&(pool->cond),NULL);
@@ -143,11 +145,12 @@ void work(threads* threads_p){
      * */
 
     /*Wait for the queue to be populated*/
-    while (THPOOL_ALIVE) {
 
-        pthread_mutex_lock(&(threads_p)->pool->poolmutex);
-        threads_p->pool->alive += 1; //increment the alive threads
-        pthread_mutex_unlock(&(threads_p)->pool->poolmutex);
+    pthread_mutex_lock(&(threads_p)->pool->poolmutex);
+    threads_p->pool->alive += 1; //increment the alive threads
+    pthread_mutex_unlock(&(threads_p)->pool->poolmutex);
+
+    while (THPOOL_ALIVE) {
 
         condwait(threads_p->pool->job_queue->qlock);
 
@@ -158,7 +161,7 @@ void work(threads* threads_p){
         node *req = Dequeue((threads_p)->pool->job_queue);
         if(req == NULL)
             condwait(threads_p->pool->job_queue->qlock);
-        else{ HTTPMsgParse(req->Req); /*The parse invokes the response builder*/ }
+        else{ threads_p->pool->work_f(req->Req); }
 
         pthread_mutex_lock(&(threads_p)->pool->poolmutex);
         (threads_p)->pool->working -= 1;
