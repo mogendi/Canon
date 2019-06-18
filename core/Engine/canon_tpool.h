@@ -32,7 +32,7 @@ typedef struct threads_p threads;
 typedef void (*callback)(void* data);
 
 //Return an initialized thpool array
-thpool_t* pool_init(int size, queue* jobQ, callback f);
+thpool_t* pool_init(callback f);
 
 //Destroys the entire pool
 void pool_kill(thpool_t* tpool);

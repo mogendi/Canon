@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/sysinfo.h>
 #include "../mutex.h"
 
 
@@ -44,7 +45,9 @@ struct thpool{
 /*                        GENERAL POOL FUNCTIONS
 ------------------------------------------------------------------------------------*/
 
-thpool_t* pool_init(int size, queue* jobQ, callback f){
+thpool_t* pool_init(callback f){
+
+    int size = get_nprocs();
 
     int loopv;
 
@@ -58,7 +61,7 @@ thpool_t* pool_init(int size, queue* jobQ, callback f){
         return NULL;
     pool->alive = 0;
     pool->working = 0;
-    pool->job_queue = jobQ;
+    pool->job_queue = CreateQ();
 
     //Initialize the threads
     pool->thpool_arr = (threads**)malloc(size * sizeof(threads));

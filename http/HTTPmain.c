@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/sysinfo.h>
 #include "DataStructures/queue.h"
 #include "Engine/canon_tpool.h"
 #include "DataStructures/request.h"
@@ -17,10 +16,8 @@
 #include "Parser.h"
 
 int main(){
-    int work_pool_size = get_nprocs(), port_c;
-    queue* Q = CreateQ();
-    thpool_t* pool = pool_init((work_pool_size),Q, HTTPMsgParse);
-
+    int port_c;
+    thpool_t* pool = pool_init(HTTPMsgParse);
 
     sock channel = HTTPConnectionGen(8080);
     socklen_t port_l = sizeof(channel.port);
@@ -31,7 +28,7 @@ int main(){
             perror("Failed Accept");
         request_t* vrequest = createRequest(NULL, NULL, NULL, NULL, NULL, NULL, port_c);
         HTTPMsgTransfer(vrequest,0,NULL);
-        Enqueue(vrequest, Q);
+        Enqueue(vrequest, pool->job_queue);
     }
     pool_kill(pool);
 }

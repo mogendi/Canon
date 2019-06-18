@@ -13,7 +13,7 @@
 #define SEND 1
 
 /*
- * HTTP connection semantics(RFC 7230:50) and HTTP/TLS not implemented
+ * http connection semantics(RFC 7230:50) and http/TLS not implemented
  * */
 
 struct sock_p{

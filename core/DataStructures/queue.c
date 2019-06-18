@@ -56,9 +56,9 @@ void Enqueue(request_t *Req,queue *Q){
 }
 
 node* Dequeue(queue *Q){
-    pthread_mutex_lock(&(Q->rwmutex));
     node* rn;
     int flag=0;
+    pthread_mutex_lock(&(Q->rwmutex));
     switch(Q->size){
         case 0:
             rn = NULL;
