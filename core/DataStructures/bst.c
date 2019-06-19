@@ -3,11 +3,16 @@
 //
 
 #include "bst.h"
+#include "mutex.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
 
+
+
+/*                        TYPE IMPLEMENTATIONS & PROTOTYPES
+------------------------------------------------------------------------------------*/
 struct bst_p{
     node* Head;
     int size;
@@ -20,25 +25,38 @@ struct node_p{
     node* right;
 };
 
+void pre_order(node* root);
+node* find_min(node* root);
+node* find_max(node* root);
+void breadth_first(node* root, callback f);
+node* find_parent(request_t* Req, node* start);
+int check_balance(node* root);
+/*----------------------------------------------------------------------------------*/
+
+
 
 /*The insert method needs a recursive
  *method of placing the nodes
  *in the correct position
 */
 void place_value(node* root, node* in) {
-    if(root->val < in->val) {
+    if(root->val > in->val) {
         if(root->left == NULL)
             root->left = in;
         else
             place_value(root->left, in);
     }
-    else if(root->val > in->val) {
+    else if(root->val < in->val) {
         if(root->right == NULL)
             root->right = in;
         else
             place_value(root->right, in);
     } else {
         /*kill the node*/
+    }
+    if(check_balance(root) == 1) {
+        printf("BST Edited, re-balanced");
+        fflush(stdout);
     }
 }
 
@@ -83,6 +101,31 @@ node* create_node(request_t* Req) {
 /*              BST FUNCS
  * ------------------------------------*/
 
+void pre_order(node* root) {
+    if(root == NULL)
+        return;
+    pre_order(root->left);
+    pre_order(root->right);
+}
+
+node* find_min(node* root) {
+    if(root->left == NULL)
+        return root;
+    find_min(root->left);
+}
+
+node* find_max(node* root) {
+    if(root->right == NULL)
+        return root;
+    find_max(root->right);
+}
+
+void breadth_first(node* root, callback f) {
+    if(root == NULL)
+        return;
+    /*Unimplemented*/
+}
+
 node* find_parent(request_t* Req, node* start) {
     node* search_node = create_node(Req);
 
@@ -109,30 +152,81 @@ node* find_parent(request_t* Req, node* start) {
     }
 }
 
-void pre_order(node* root) {
-    if(root == NULL)
-        return;
-    pre_order(root->left);
-    pre_order(root->right);
+void right_rotate(node* root) {
+    node* left_node = root->left;
+    root->left = left_node->right;
+    left_node->right = root;
+    node* parent = find_parent(root->request, root);
+    if(root->val > parent->val)
+        parent->right = left_node;
+    else
+        parent->left = left_node;
 }
 
-node* find_min(node* root) {
-    if(root->left == NULL)
-        return root;
-    find_min(root->left);
+void left_rotate(node* root) {
+    node* right_node = root->right;
+    root->right = right_node->left;
+    right_node->left = root;
+    node* parent = find_parent(root->request, root);
+    if(root->val > parent->val)
+        parent->right = right_node;
+    else
+        parent->left = right_node;
 }
 
-node* find_max(node* root) {
-    if(root->right == NULL)
-        return root;
-    find_max(root->right);
+void left_right(node* root) {
+    left_rotate(root->left);
+    right_rotate(root);
 }
 
-void breadth_first(node* root) {
-    if(root == NULL)
-        return;
-    /*Unimplemented*/
+void right_left(node* root) {
+    right_rotate(root->right);
+    left_rotate(root);
 }
+
+int height(node* root, int h) {
+    int left_h = h, right_h = h;
+    if(root->left != NULL || root->right != NULL)
+        h += 1;
+    if(root->left != NULL) {
+        left_h = height(root->left, h);
+    }
+    if(root->right != NULL) {
+        right_h = height(root->right, h);
+    }
+    if(left_h > right_h) {
+        return left_h;
+    } else { return right_h; }
+}
+
+/*Return 0 if no re-balancing happened otherwise returns 1*/
+int check_balance(node* root) {
+    int flag = 0;
+
+    if((height(root->left, 0)- height(root->right, 0))>1) {
+        if((height(root->left->left, 0)- height(root->left->right, 0))>0) {
+            right_rotate(root);
+            flag = 1;
+        } else {
+            left_right(root);
+            flag = 1;
+        }
+    }
+
+    if((height(root->left, 0)- height(root->right, 0))<-1) {
+        if((height(root->right->left, 0)- height(root->right->right, 0))<0) {
+            left_rotate(root);
+            flag = 1;
+        } else {
+            right_left(root);
+            flag = 1;
+        }
+    }
+
+    return flag;
+
+}
+
 
 /*       API IMPLEMENTATION
  *-------------------------------*/

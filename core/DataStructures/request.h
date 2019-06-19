@@ -18,7 +18,7 @@ struct request
 
 typedef struct request request_t;
 
-request_t *createRequest(char *MSGi, char *method, char *URL, char *req, hashtable_t *hmap, char *body, int sock_fd);
+request_t *createRequest(int sock_fd);
 
 void kill_Req(request_t* reql);
 

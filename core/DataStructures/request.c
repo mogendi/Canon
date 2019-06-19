@@ -5,17 +5,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hashmap.h"
+#include <time.h>
 
-request_t *createRequest(char *MSGi, char *method, char *URL, char *req, hashtable_t *hmap, char *body, int sock_fd){
+request_t *createRequest(int sock_fd){
     request_t *reql = (request_t*)malloc(sizeof(request_t));
     if(reql == NULL){
-        printf("MALLOC failed\n");
+        printf("Couldn't create Request failed\n");
         return NULL;
     }
-    reql->MSG = MSGi;
-    reql->req_line = req;
-    reql->Headers = hmap;
-    reql->body = body;
+
+    reql->MSG = NULL;
+    reql->req_line = NULL;
+    reql->Headers = NULL;
+    reql->body = NULL;
     reql->sockfd = sock_fd;
     reql->secs = time(NULL)%3600;
     return reql;

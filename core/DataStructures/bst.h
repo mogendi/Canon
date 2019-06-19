@@ -6,17 +6,15 @@
 #define CANON_BST_H
 
 #include "request.h"
-#include "mutex.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
 
 /*
  * Standard BST API where protocols can use the structure
  * to extend their logic.
  * TODO: Make the BST more like AVL trees
  * */
+
+
+typedef void (*callback)(void* data);
 
 typedef struct node_p node;
 

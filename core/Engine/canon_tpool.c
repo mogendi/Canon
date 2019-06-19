@@ -31,17 +31,6 @@ struct threads_p{
     thpool_t* pool;
 };
 
-struct thpool{
-    threads **thpool_arr; //Pointer to the array of threads
-    queue* job_queue; //Pointer to the queue (Defined in core/Data structures/queue.h)
-    callback work_f;
-    int working; // Number of working threads
-    int alive; //Number of alive threads
-    pthread_mutex_t poolmutex; //Mutex for the thread pools types
-    pthread_cond_t cond; // Conditional variable to control pool activity
-};
-
-
 /*                        GENERAL POOL FUNCTIONS
 ------------------------------------------------------------------------------------*/
 
