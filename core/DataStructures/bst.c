@@ -244,7 +244,6 @@ void place_value(node_t* root, node_t* in) {
         /*kill the node*/
     }
     if(check_balance(root) == 1) {
-        printf("\nBST Edited, re-balanced\n");
         fflush(stdout);
     }
 }
