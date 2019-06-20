@@ -16,7 +16,7 @@
 
 typedef void (*callback)(void* data);
 
-typedef struct node_p node;
+typedef struct node node_t;
 
 /*The BST structure
  * In Interest of maintaining a 'light'
@@ -30,11 +30,16 @@ typedef struct bst_p bst;
 /*                  BST API
  * =======================================*/
 
+
+/* The BST logically doesn't need to keep all of it's
+ * members in a contagious memory location therefore a size
+ * doesn't have to be defined up front*/
+bst* create_bst();
+
 void insert(bst* bst_l, request_t* Req);
 
-node* search(request_t* Req, node* start);
+node_t* search(request_t* Req, node_t* start);
 
 int delete(request_t* Req, bst* bst_l);
-
 
 #endif //CANON_BST_H

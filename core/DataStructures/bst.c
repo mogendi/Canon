@@ -4,6 +4,7 @@
 
 #include "bst.h"
 #include "mutex.h"
+#include "queue.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -14,58 +15,27 @@
 /*                        TYPE IMPLEMENTATIONS & PROTOTYPES
 ------------------------------------------------------------------------------------*/
 struct bst_p{
-    node* Head;
+    node_t* Head;
     int size;
 };
 
-struct node_p{
+struct node{
     int val;
     request_t* request;
-    node* left;
-    node* right;
+    node_t* left;
+    node_t* right;
+    bst* bst_l; //Head of thr parent BST
 };
 
-void pre_order(node* root);
-node* find_min(node* root);
-node* find_max(node* root);
-void breadth_first(node* root, callback f);
-node* find_parent(request_t* Req, node* start);
-int check_balance(node* root);
+int check_balance(node_t* root);
+void place_value(node_t* root, node_t* in);
 /*----------------------------------------------------------------------------------*/
-
-
-
-/*The insert method needs a recursive
- *method of placing the nodes
- *in the correct position
-*/
-void place_value(node* root, node* in) {
-    if(root->val > in->val) {
-        if(root->left == NULL)
-            root->left = in;
-        else
-            place_value(root->left, in);
-    }
-    else if(root->val < in->val) {
-        if(root->right == NULL)
-            root->right = in;
-        else
-            place_value(root->right, in);
-    } else {
-        /*kill the node*/
-    }
-    if(check_balance(root) == 1) {
-        printf("BST Edited, re-balanced");
-        fflush(stdout);
-    }
-}
-
 
 /*The stored types are requests therefore
  * a method of deriving integers from
  * their message is necessary
  * */
-void dry_hash( int size, node* bst_l) {
+void dry_hash( int size, node_t* bst_l) {
 
     unsigned long int hashval;
     int i = 0;
@@ -84,8 +54,8 @@ void dry_hash( int size, node* bst_l) {
 /*               NODE FUNCS
  * ------------------------------------*/
 
-node* create_node(request_t* Req) {
-    node* new_n = (node *)malloc(sizeof(node));
+node_t* create_node(request_t* Req) {
+    node_t* new_n = (node_t *)malloc(sizeof(node_t));
     if(new_n == NULL){
         printf("Failed to initialize BST");
         exit(1);
@@ -101,33 +71,33 @@ node* create_node(request_t* Req) {
 /*              BST FUNCS
  * ------------------------------------*/
 
-void pre_order(node* root) {
+void pre_order(node_t* root) {
     if(root == NULL)
         return;
     pre_order(root->left);
     pre_order(root->right);
 }
 
-node* find_min(node* root) {
+node_t* find_min(node_t* root) {
     if(root->left == NULL)
         return root;
     find_min(root->left);
 }
 
-node* find_max(node* root) {
+node_t* find_max(node_t* root) {
     if(root->right == NULL)
         return root;
     find_max(root->right);
 }
 
-void breadth_first(node* root, callback f) {
+void breadth_first(node_t* root, callback f) {
     if(root == NULL)
         return;
     /*Unimplemented*/
 }
 
-node* find_parent(request_t* Req, node* start) {
-    node* search_node = create_node(Req);
+node_t* find_parent(request_t* Req, node_t* start) {
+    node_t* search_node = create_node(Req);
 
     if(start == NULL)
         return NULL;
@@ -152,39 +122,50 @@ node* find_parent(request_t* Req, node* start) {
     }
 }
 
-void right_rotate(node* root) {
-    node* left_node = root->left;
+void right_rotate(node_t* root) {
+    node_t* left_node = root->left;
     root->left = left_node->right;
     left_node->right = root;
-    node* parent = find_parent(root->request, root);
+    node_t* parent = find_parent(root->request, root->bst_l->Head);
+    if(parent == NULL) {
+        root->bst_l->Head = left_node;
+        return;
+    }
     if(root->val > parent->val)
         parent->right = left_node;
     else
         parent->left = left_node;
 }
 
-void left_rotate(node* root) {
-    node* right_node = root->right;
+void left_rotate(node_t* root) {
+    node_t* right_node = root->right;
     root->right = right_node->left;
     right_node->left = root;
-    node* parent = find_parent(root->request, root);
+    node_t* parent = find_parent(root->request, root->bst_l->Head);
+    if(parent == NULL) {
+        root->bst_l->Head = right_node;
+        return;
+    }
     if(root->val > parent->val)
         parent->right = right_node;
     else
         parent->left = right_node;
 }
 
-void left_right(node* root) {
+void left_right(node_t* root) {
     left_rotate(root->left);
     right_rotate(root);
 }
 
-void right_left(node* root) {
+void right_left(node_t* root) {
     right_rotate(root->right);
     left_rotate(root);
 }
 
-int height(node* root, int h) {
+int height(node_t* root, int h) {
+    if(root == NULL)
+        return 0;
+
     int left_h = h, right_h = h;
     if(root->left != NULL || root->right != NULL)
         h += 1;
@@ -194,13 +175,14 @@ int height(node* root, int h) {
     if(root->right != NULL) {
         right_h = height(root->right, h);
     }
+    printf("Height: %d %d \n", right_h, left_h);
     if(left_h > right_h) {
         return left_h;
     } else { return right_h; }
 }
 
 /*Return 0 if no re-balancing happened otherwise returns 1*/
-int check_balance(node* root) {
+int check_balance(node_t* root) {
     int flag = 0;
 
     if((height(root->left, 0)- height(root->right, 0))>1) {
@@ -227,21 +209,61 @@ int check_balance(node* root) {
 
 }
 
+/*The insert method needs a recursive
+ *method of placing the nodes
+ *in the correct position
+*/
+void place_value(node_t* root, node_t* in) {
+    if(root->val > in->val) {
+        if(root->left == NULL)
+            root->left = in;
+        else
+            place_value(root->left, in);
+    }
+    else if(root->val < in->val) {
+        if(root->right == NULL)
+            root->right = in;
+        else
+            place_value(root->right, in);
+    } else {
+        /*kill the node*/
+    }
+    if(check_balance(root) == 1) {
+        printf("\nBST Edited, re-balanced\n");
+        fflush(stdout);
+    }
+}
+
 
 /*       API IMPLEMENTATION
  *-------------------------------*/
 
+bst* create_bst() {
+    bst* bst_l = (bst *)malloc(sizeof(bst));
+
+    if(bst_l == NULL) {
+        printf("Memory allocation for bst failed");
+        fflush(stdout);
+        return NULL;
+    }
+
+    bst_l->Head = NULL;
+    bst_l->size = 0;
+}
+
 void insert(bst* bst_l, request_t* Req) {
-    node* in = create_node(Req);
+    node_t* in = create_node(Req);
+    in->bst_l = bst_l;
     if(bst_l->Head == NULL) {
         bst_l->Head = in;
     } else {
         place_value(bst_l->Head,in);
     }
+    bst_l->size += 1;
 }
 
-node* search(request_t* Req, node* start) {
-    node* search_node = create_node(Req);
+node_t* search(request_t* Req, node_t* start) {
+    node_t* search_node = create_node(Req);
     int val = search_node->val;
 
     if(start == NULL)
@@ -259,8 +281,8 @@ int delete(request_t* Req, bst* bst_l) {
     if(bst_l == NULL)
         return 1;
 
-    node* del = search(Req, bst_l->Head);
-    node* parent = find_parent(Req, bst_l->Head);
+    node_t* del = search(Req, bst_l->Head);
+    node_t* parent = find_parent(Req, bst_l->Head);
 
     if(del == NULL)
         return 1;
@@ -305,10 +327,10 @@ int delete(request_t* Req, bst* bst_l) {
         return 0;
     }
 
-    if(del->left == NULL && del->right == NULL) {
+    if(del->left != NULL && del->right != NULL) {
         //If the node has a left and right subtree
-        node* largest = find_max(del->left);
-        node* parent_l = find_parent(largest->request, del->left);
+        node_t* largest = find_max(del->left);
+        node_t* parent_l = find_parent(largest->request, del->left);
         parent_l->right = NULL;
         if(del->val < parent->val)
             parent->left = largest;
@@ -317,6 +339,15 @@ int delete(request_t* Req, bst* bst_l) {
         bst_l->size -= 1;
         free(del);
         return 0;
+    }
+    node_t* l2 = find_parent(parent->request, bst_l->Head);
+    int trace = height(l2, 0);
+    while(trace > 0) {
+        check_balance(l2);
+        check_balance(l2->left);
+        check_balance(l2->right);
+
+        trace--;
     }
 
 }
