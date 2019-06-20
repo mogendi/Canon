@@ -287,7 +287,7 @@ node_t* search(request_t* Req, node_t* start) {
         return start;
     }
 
-    else if(start->val < val)
+    else if(val < start->val)
         search(Req, start->left );
     else
         search(Req, start->right);
