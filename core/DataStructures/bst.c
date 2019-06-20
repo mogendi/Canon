@@ -191,7 +191,6 @@ int height(node_t* root, int h) {
     if(root->right != NULL) {
         right_h = height(root->right, h);
     }
-    printf("Height: %d %d \n", right_h, left_h);
     if(left_h > right_h) {
         return left_h;
     } else { return right_h; }
