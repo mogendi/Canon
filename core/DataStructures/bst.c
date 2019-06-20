@@ -25,6 +25,7 @@ struct node{
     node_t* left;
     node_t* right;
     bst* bst_l; //Head of thr parent BST
+    int freq;
 };
 
 int check_balance(node_t* root);
@@ -50,6 +51,20 @@ void dry_hash( int size, node_t* bst_l) {
     bst_l->val = hashval % size;
 }
 
+int dry_hash_free(request_t* Req) {
+
+    unsigned long int hashval;
+    int i = 0;
+
+    while( hashval < ULONG_MAX && i < strlen( Req->MSG ) ) {
+        hashval = hashval << 8;
+        hashval += Req->MSG[ i ];
+        i++;
+    }
+
+    return hashval % Req->sockfd;
+}
+
 
 /*               NODE FUNCS
  * ------------------------------------*/
@@ -64,6 +79,7 @@ node_t* create_node(request_t* Req) {
     new_n->request = Req;
     new_n->left = NULL;
     new_n->right = NULL;
+    new_n->freq = 0;
     dry_hash(Req->sockfd,new_n);
 }
 
@@ -263,14 +279,16 @@ void insert(bst* bst_l, request_t* Req) {
 }
 
 node_t* search(request_t* Req, node_t* start) {
-    node_t* search_node = create_node(Req);
-    int val = search_node->val;
+    int val = dry_hash_free(Req);
 
     if(start == NULL)
         return NULL;
 
-    if(start->val == val)
+    if(start->val == val) {
+        start->freq += 1;
         return start;
+    }
+
     else if(start->val < val)
         search(Req, start->left );
     else
