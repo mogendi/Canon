@@ -10,7 +10,12 @@
 /*
  * Standard BST API where protocols can use the structure
  * to extend their logic.
- * TODO: Make the BST more like AVL trees
+ * */
+
+/*
+ * ISSUES: the tight coupling of the BSTs and
+ *         request types
+ * TODO: Make the BSTs API more Abstract
  * */
 
 
