@@ -150,10 +150,10 @@ void work(threads* threads_p){
         (threads_p)->pool->working += 1;
         pthread_mutex_unlock(&(threads_p)->pool->poolmutex);
 
-        node *req = Dequeue((threads_p)->pool->job_queue);
+        request_t *req = Dequeue((threads_p)->pool->job_queue);
         if(req == NULL)
             condwait(threads_p->pool->job_queue->qlock);
-        else{ threads_p->pool->work_f(req->Req); }
+        else{ threads_p->pool->work_f(req); }
 
         pthread_mutex_lock(&(threads_p)->pool->poolmutex);
         (threads_p)->pool->working -= 1;
