@@ -4,6 +4,13 @@
 #include "hashmap.h"
 #include <time.h>
 
+
+/*Holds the implementation for both request and response types*/
+
+
+typedef struct request request_t;
+typedef struct resp resp_t;
+
 struct request
 {
     char *MSG;
@@ -14,11 +21,21 @@ struct request
     char *body;
     int sockfd;
     time_t secs;
+    resp_t* resp;
 };
 
-typedef struct request request_t;
+
+struct resp {
+    request_t* Req;
+    int status;
+    char* reason;
+    hashtable_t *Headers;
+    char* body;
+};
 
 request_t *createRequest(int sock_fd);
+
+resp_t *createResp(request_t* Req);
 
 void kill_Req(request_t* reql);
 

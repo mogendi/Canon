@@ -21,7 +21,23 @@ request_t *createRequest(int sock_fd){
     reql->body = NULL;
     reql->sockfd = sock_fd;
     reql->secs = time(NULL)%3600;
+    reql->resp = NULL;
     return reql;
+}
+
+resp_t *createResp(request_t* Req) {
+    resp_t *resp_l = (resp_t*)malloc(sizeof(resp_t));
+    if(resp_l == NULL) {
+        printf("Couldn't create Resp");
+        return NULL;
+    }
+
+    resp_l->Req = Req;
+    resp_l->Headers = NULL;
+    resp_l->body = NULL;
+    resp_l->status = 0;
+    resp_l->reason = NULL;
+    return resp_l;
 }
 
 void kill_Req(request_t* reql){
@@ -30,6 +46,7 @@ void kill_Req(request_t* reql){
     } else {
         ht_destroy(reql->Headers);
     }
+    free(reql->resp);
     free(reql);
 }
 
