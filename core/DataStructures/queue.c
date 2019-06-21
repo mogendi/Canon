@@ -55,8 +55,8 @@ void Enqueue(request_t *Req,queue *Q){
     pthread_mutex_unlock(&(Q->rwmutex));
 }
 
-node* Dequeue(queue *Q){
-    node* rn;
+request_t* Dequeue(queue *Q){
+    node* rn; request_t* req = NULL;
     int flag=0;
     pthread_mutex_lock(&(Q->rwmutex));
     switch(Q->size){
@@ -76,12 +76,36 @@ node* Dequeue(queue *Q){
     }
     pthread_mutex_unlock(&(Q->rwmutex));
     toggle_monitor(Q->qlock, flag);
-    return rn;
+    if(rn != NULL)
+        req = rn->Req;
+    free(rn);
+    return req;
+}
+
+/*
+ * Returns 0 if the processes is successful
+ * 1 otherwise
+ * @Paramas: A - origin queue, B - Target queue,
+ * size - number of elements to map */
+int map(queue* A, queue* B, int size) {
+    if(A->size < size) {
+        printf("Origin queue size too small\n");
+        return 1;
+    }
+
+    int loopv = 0;
+    request_t* shared_loc[size];
+    for (loopv; loopv < (size-1); loopv++) {
+        shared_loc[loopv] = Dequeue(A);
+    }
+    for(loopv = 0; loopv < (size-1); loopv++) {
+        Enqueue(shared_loc[loopv], B);
+    }
 }
 
 int destroy_q(queue* Q) {
     if(Q == NULL) return 0;
-    node* cursor;
+    node* cursor = Q->Head;
     while(cursor != NULL) {
         cursor = Q->Head;
         kill_Req(cursor->Req);

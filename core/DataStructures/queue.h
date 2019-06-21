@@ -29,7 +29,13 @@ queue* CreateQ();
  * */
 void Enqueue(request_t* Req,queue *Q);
 
-node* Dequeue(queue *Q);
+request_t* Dequeue(queue *Q);
+
+/*
+ * Maps a section(of specified size) of one queue
+ * to another queue
+ * */
+int map(queue* A, queue* B, int size);
 
 int destroy_q(queue* Q);
 
