@@ -33,7 +33,7 @@ void HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
             printf("Corrupt Request");
         }
         if (buffsize > 0) {
-            Req->MSG = recv_buff;
+            Req->MSG = strdup(recv_buff);
         }
     }
 
