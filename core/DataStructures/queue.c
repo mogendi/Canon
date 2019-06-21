@@ -39,7 +39,6 @@ void Enqueue(request_t *Req,queue *Q){
 
     if(Q == NULL)
         Q = CreateQ();
-    int flag=0;
     pthread_mutex_lock(&(Q->rwmutex));
     switch(Q->size){
         case 0:
@@ -51,6 +50,7 @@ void Enqueue(request_t *Req,queue *Q){
         default:
             Q->Tail->next = new_n;
             Q->Tail = new_n;
+            Q->size ++;
     }
     pthread_mutex_unlock(&(Q->rwmutex));
 }
