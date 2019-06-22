@@ -4,7 +4,6 @@
 
 #include "bst.h"
 #include "mutex.h"
-#include "queue.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -21,7 +20,7 @@ struct bst_p{
 
 struct node{
     int val;
-    request_t* request;
+    void* request;
     node_t* left;
     node_t* right;
     bst* bst_l; //Head of thr parent BST
@@ -32,44 +31,12 @@ int check_balance(node_t* root);
 void place_value(node_t* root, node_t* in);
 /*----------------------------------------------------------------------------------*/
 
-/*The stored types are requests therefore
- * a method of deriving integers from
- * their message is necessary
- * */
-void dry_hash( int size, node_t* bst_l) {
-
-    unsigned long int hashval;
-    int i = 0;
-
-    // Convert our string to an integer
-    while( hashval < ULONG_MAX && i < strlen( bst_l->request->MSG ) ) {
-        hashval = hashval << 8;
-        hashval += bst_l->request->MSG[ i ];
-        i++;
-    }
-
-    bst_l->val = hashval % size;
-}
-
-int dry_hash_free(request_t* Req) {
-
-    unsigned long int hashval;
-    int i = 0;
-
-    while( hashval < ULONG_MAX && i < strlen( Req->MSG ) ) {
-        hashval = hashval << 8;
-        hashval += Req->MSG[ i ];
-        i++;
-    }
-
-    return hashval % Req->sockfd;
-}
 
 
 /*               NODE FUNCS
  * ------------------------------------*/
 
-node_t* create_node(request_t* Req) {
+node_t* create_node(int value, void* Req) {
     node_t* new_n = (node_t *)malloc(sizeof(node_t));
     if(new_n == NULL){
         printf("Failed to initialize BST");
@@ -80,7 +47,8 @@ node_t* create_node(request_t* Req) {
     new_n->left = NULL;
     new_n->right = NULL;
     new_n->freq = 0;
-    dry_hash(Req->sockfd,new_n);
+    new_n->val = value;
+    return new_n;
 }
 
 
@@ -98,12 +66,16 @@ node_t* find_min(node_t* root) {
     if(root->left == NULL)
         return root;
     find_min(root->left);
+
+    return NULL;
 }
 
 node_t* find_max(node_t* root) {
     if(root->right == NULL)
         return root;
     find_max(root->right);
+
+    return NULL;
 }
 
 void breadth_first(node_t* root, callback f) {
@@ -112,8 +84,8 @@ void breadth_first(node_t* root, callback f) {
     /*Unimplemented*/
 }
 
-node_t* find_parent(request_t* Req, node_t* start) {
-    node_t* search_node = create_node(Req);
+node_t* find_parent(int value, node_t* start) {
+    node_t* search_node = create_node(value, NULL);
 
     if(start == NULL)
         return NULL;
@@ -127,22 +99,24 @@ node_t* find_parent(request_t* Req, node_t* start) {
         else if(start->left->val == search_node->val)
             return start;
         else
-            find_parent(Req, start->left);
+            find_parent(value, start->left);
     } else {
         if(start->right == NULL)
             return NULL;
         else if(start->right->val == search_node->val)
             return start;
         else
-            find_parent(Req, start->right);
+            find_parent(value, start->right);
     }
+
+    return NULL;
 }
 
 void right_rotate(node_t* root) {
     node_t* left_node = root->left;
     root->left = left_node->right;
     left_node->right = root;
-    node_t* parent = find_parent(root->request, root->bst_l->Head);
+    node_t* parent = find_parent(root->val, root->bst_l->Head);
     if(parent == NULL) {
         root->bst_l->Head = left_node;
         return;
@@ -157,7 +131,7 @@ void left_rotate(node_t* root) {
     node_t* right_node = root->right;
     root->right = right_node->left;
     right_node->left = root;
-    node_t* parent = find_parent(root->request, root->bst_l->Head);
+    node_t* parent = find_parent(root->val, root->bst_l->Head);
     if(parent == NULL) {
         root->bst_l->Head = right_node;
         return;
@@ -263,10 +237,11 @@ bst* create_bst() {
 
     bst_l->Head = NULL;
     bst_l->size = 0;
+    return bst_l;
 }
 
-void insert(bst* bst_l, request_t* Req) {
-    node_t* in = create_node(Req);
+void insert(int value, bst* bst_l, void* Req) {
+    node_t* in = create_node(value, Req);
     in->bst_l = bst_l;
     if(bst_l->Head == NULL) {
         bst_l->Head = in;
@@ -276,8 +251,8 @@ void insert(bst* bst_l, request_t* Req) {
     bst_l->size += 1;
 }
 
-node_t* search(request_t* Req, node_t* start) {
-    int val = dry_hash_free(Req);
+node_t* search(int value, node_t* start) {
+    int val = value;
 
     if(start == NULL)
         return NULL;
@@ -288,17 +263,19 @@ node_t* search(request_t* Req, node_t* start) {
     }
 
     else if(val < start->val)
-        search(Req, start->left );
+        search(val, start->left );
     else
-        search(Req, start->right);
+        search(val, start->right);
+
+    return NULL;
 }
 
-int delete(request_t* Req, bst* bst_l) {
+int delete(int value, bst* bst_l) {
     if(bst_l == NULL)
         return 1;
 
-    node_t* del = search(Req, bst_l->Head);
-    node_t* parent = find_parent(Req, bst_l->Head);
+    node_t* del = search(value, bst_l->Head);
+    node_t* parent = find_parent(value, bst_l->Head);
 
     if(del == NULL)
         return 1;
@@ -346,7 +323,7 @@ int delete(request_t* Req, bst* bst_l) {
     if(del->left != NULL && del->right != NULL) {
         //If the node has a left and right subtree
         node_t* largest = find_max(del->left);
-        node_t* parent_l = find_parent(largest->request, del->left);
+        node_t* parent_l = find_parent(largest->val, del->left);
         parent_l->right = NULL;
         if(del->val < parent->val)
             parent->left = largest;
@@ -356,14 +333,18 @@ int delete(request_t* Req, bst* bst_l) {
         free(del);
         return 0;
     }
-    node_t* l2 = find_parent(parent->request, bst_l->Head);
-    int trace = height(l2, 0);
-    while(trace > 0) {
-        check_balance(l2);
-        check_balance(l2->left);
-        check_balance(l2->right);
+    node_t* l2 = find_parent(parent->val, bst_l->Head);
+    if(l2 != NULL) {
+        int trace = height(l2, 0);
+        while (trace > 0) {
+            check_balance(l2);
+            check_balance(l2->left);
+            check_balance(l2->right);
 
-        trace--;
+            trace--;
+        }
     }
+
+    return 1;
 
 }

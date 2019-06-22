@@ -5,8 +5,6 @@
 #ifndef CANON_BST_H
 #define CANON_BST_H
 
-#include "request.h"
-
 /*
  * Standard BST API where protocols can use the structure
  * to extend their logic.
@@ -15,7 +13,6 @@
 /*
  * ISSUES: the tight coupling of the BSTs and
  *         request types
- * TODO: Make the BSTs API more Abstract
  * */
 
 
@@ -41,10 +38,15 @@ typedef struct bst_p bst;
  * doesn't have to be defined up front*/
 bst* create_bst();
 
-void insert(bst* bst_l, request_t* Req);
+/*
+ * The insert function will allow you to
+ * pass a void pointer for any data you might
+ * want to store that isn't the actual node value
+ * */
+void insert(int value, bst* bst_l, void* Req);
 
-node_t* search(request_t* Req, node_t* start);
+node_t* search(int value, node_t* start);
 
-int delete(request_t* Req, bst* bst_l);
+int delete(int value, bst* bst_l);
 
 #endif //CANON_BST_H
