@@ -29,26 +29,45 @@
 
 typedef struct thpool thpool_t;
 typedef struct threads_p threads;
-typedef void (*callback)(void* data);
+typedef struct threads_cust cust;
+typedef void* (*callback)(void* data);
+typedef struct funcs_t funcs; //Work functions
 
 struct thpool{
     threads **thpool_arr; //Pointer to the array of threads
     queue* job_queue; //Pointer to the queue (Defined in core/Data structures/queue.h)
-    callback work_f;
-    int working; // Number of working threads
+    funcs* work_f;
+    int size;
     int alive; //Number of alive threads
+    int working; // Number of working threads
     pthread_mutex_t poolmutex; //Mutex for the thread pools types
     pthread_cond_t cond; // Conditional variable to control pool activity
 };
 
+struct threads_cust{
+    threads* thread;
+    callback f1;
+    callback f2;
+    pthread_cond_t* cond;
+};
+
+struct funcs_t {
+    callback f1;
+    callback f2;
+};
+
 //Return an initialized thpool array
-thpool_t* pool_init(callback f);
+thpool_t* pool_init(callback f1, callback f2);
 
 //Destroys the entire pool
 void pool_kill(thpool_t* tpool);
 
-//Polls for any working threads, return int array of all non working threads
-int* poll(thpool_t* tpool);
+/*custom thread with specified behaviour
+ * not tied to job queues*/
+int cust_thread(callback f, callback f2, pthread_cond_t* cond, thpool_t* pool);
+
+//Polls the threads for its information
+int poll(thpool_t* tpool);
 
 //Pauses threads, un-pauses if they're all paused
 void pause_pool(thpool_t* tpool);
