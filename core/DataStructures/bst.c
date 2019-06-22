@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <time.h>
 
 
 
@@ -25,6 +26,7 @@ struct node{
     node_t* right;
     bst* bst_l; //Head of thr parent BST
     int freq;
+    time_t access;
 };
 
 int check_balance(node_t* root);
@@ -48,6 +50,7 @@ node_t* create_node(int value, void* Req) {
     new_n->right = NULL;
     new_n->freq = 0;
     new_n->val = value;
+    new_n->access = time(NULL)%3600;
     return new_n;
 }
 
@@ -259,6 +262,8 @@ node_t* search(int value, node_t* start) {
 
     if(start->val == val) {
         start->freq += 1;
+        start->access = time(NULL);
+        start->access = start->access%3600;
         return start;
     }
 
