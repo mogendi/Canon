@@ -28,6 +28,10 @@ typedef struct node node_t;
 
 typedef struct bst_p bst;
 
+struct bst_p{
+    node_t* Head;
+    int size;
+};
 
 /*                  BST API
  * =======================================*/

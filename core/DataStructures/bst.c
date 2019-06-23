@@ -9,15 +9,12 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <time.h>
+#define COUNT 10
 
 
 
 /*                        TYPE IMPLEMENTATIONS & PROTOTYPES
 ------------------------------------------------------------------------------------*/
-struct bst_p{
-    node_t* Head;
-    int size;
-};
 
 struct node{
     int val;
@@ -58,11 +55,20 @@ node_t* create_node(int value, void* Req) {
 /*              BST FUNCS
  * ------------------------------------*/
 
-void pre_order(node_t* root) {
+void pre_order(node_t* root, callback f) {
     if(root == NULL)
         return;
-    pre_order(root->left);
-    pre_order(root->right);
+    f(root);
+    pre_order(root->left, f);
+    pre_order(root->right, f);
+}
+
+void post_order(node_t* root, callback f) {
+    if(root == NULL)
+        return;
+    post_order(root->left, f);
+    post_order(root->right, f);
+    f(root);
 }
 
 node_t* find_min(node_t* root) {
@@ -81,45 +87,40 @@ node_t* find_max(node_t* root) {
     return NULL;
 }
 
-void breadth_first(node_t* root, callback f) {
-    if(root == NULL)
-        return;
-    /*Unimplemented*/
-}
-
 node_t* find_parent(int value, node_t* start) {
-    node_t* search_node = create_node(value, NULL);
-
+    int val = value;
     if(start == NULL)
         return NULL;
 
-    if(search_node->val == start->val)
+    if(val == start->val)
         return NULL;
 
-    if(search_node->val < start->val) {
+    if(val < start->val) {
         if(start->left == NULL)
             return NULL;
-        else if(start->left->val == search_node->val)
+        else if(start->left->val == val)
             return start;
         else
-            find_parent(value, start->left);
-    } else {
+            return find_parent(value, start->left);
+    } else if(val > start->val){
         if(start->right == NULL)
             return NULL;
-        else if(start->right->val == search_node->val)
+        else if(start->right->val == val)
             return start;
         else
-            find_parent(value, start->right);
-    }
+            return find_parent(value, start->right);
+    } else {  }
 
     return NULL;
 }
 
 void right_rotate(node_t* root) {
+    if(root == NULL || root->left == NULL)
+        return;
+    node_t* parent = find_parent(root->val, root->bst_l->Head);
     node_t* left_node = root->left;
     root->left = left_node->right;
     left_node->right = root;
-    node_t* parent = find_parent(root->val, root->bst_l->Head);
     if(parent == NULL) {
         root->bst_l->Head = left_node;
         return;
@@ -131,10 +132,12 @@ void right_rotate(node_t* root) {
 }
 
 void left_rotate(node_t* root) {
+    if(root == NULL || root->right == NULL)
+        return;
+    node_t* parent = find_parent(root->val, root->bst_l->Head);
     node_t* right_node = root->right;
     root->right = right_node->left;
     right_node->left = root;
-    node_t* parent = find_parent(root->val, root->bst_l->Head);
     if(parent == NULL) {
         root->bst_l->Head = right_node;
         return;
@@ -169,12 +172,15 @@ int height(node_t* root, int h) {
         right_h = height(root->right, h);
     }
     if(left_h > right_h) {
-        return left_h;
-    } else { return right_h; }
+        return left_h+1;
+    } else { return right_h+1; }
 }
 
 /*Return 0 if no re-balancing happened otherwise returns 1*/
 int check_balance(node_t* root) {
+    if(root == NULL)
+        return 1;
+
     int flag = 0;
 
     if((height(root->left, 0)- height(root->right, 0))>1) {
@@ -220,11 +226,11 @@ void place_value(node_t* root, node_t* in) {
     } else {
         /*kill the node*/
     }
-    if(check_balance(root) == 1) {
-        fflush(stdout);
-    }
-}
+    if(check_balance(root) == 1) { }
+    if(check_balance(root->left) == 1) { }
+    if(check_balance(root->right) == 1) { }
 
+}
 
 /*       API IMPLEMENTATION
  *-------------------------------*/
