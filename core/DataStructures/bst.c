@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <time.h>
-#define COUNT 10
 
 
 
