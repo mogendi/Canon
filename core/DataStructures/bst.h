@@ -53,4 +53,6 @@ node_t* search(int value, node_t* start);
 
 int delete(int value, bst* bst_l);
 
+int destroy_bst(bst* bst_l);
+
 #endif //CANON_BST_H

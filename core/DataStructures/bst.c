@@ -20,7 +20,7 @@ struct node{
     void* request;
     node_t* left;
     node_t* right;
-    bst* bst_l; //Head of thr parent BST
+    bst* bst_l; //Head of the parent BST
     int freq;
     time_t access;
 };
@@ -73,17 +73,16 @@ void post_order(node_t* root, callback f) {
 node_t* find_min(node_t* root) {
     if(root->left == NULL)
         return root;
-    find_min(root->left);
+    else
+        return find_min(root->left);
 
-    return NULL;
 }
 
 node_t* find_max(node_t* root) {
     if(root->right == NULL)
         return root;
-    find_max(root->right);
-
-    return NULL;
+    else
+        return find_max(root->right);
 }
 
 node_t* find_parent(int value, node_t* start) {
@@ -273,16 +272,18 @@ node_t* search(int value, node_t* start) {
     }
 
     else if(val < start->val)
-        search(val, start->left );
+        return search(val, start->left );
     else
-        search(val, start->right);
+        return search(val, start->right);
 
-    return NULL;
 }
 
 int delete(int value, bst* bst_l) {
     if(bst_l == NULL)
         return 1;
+
+    if(value == bst_l->Head->val)
+        destroy_bst(bst_l);
 
     node_t* del = search(value, bst_l->Head);
     node_t* parent = find_parent(value, bst_l->Head);
@@ -332,7 +333,7 @@ int delete(int value, bst* bst_l) {
 
     if(del->left != NULL && del->right != NULL) {
         //If the node has a left and right subtree
-        node_t* largest = find_max(del->left);
+        node_t *largest = find_max(del->left);
         node_t* parent_l = find_parent(largest->val, del->left);
         parent_l->right = NULL;
         if(del->val < parent->val)
@@ -343,13 +344,13 @@ int delete(int value, bst* bst_l) {
         free(del);
         return 0;
     }
-    node_t* l2 = find_parent(parent->val, bst_l->Head);
-    if(l2 != NULL) {
-        int trace = height(l2, 0);
+
+    if(parent != NULL) {
+        int trace = height(parent, 0);
         while (trace > 0) {
-            check_balance(l2);
-            check_balance(l2->left);
-            check_balance(l2->right);
+            check_balance(parent);
+            check_balance(parent->left);
+            check_balance(parent->right);
 
             trace--;
         }
@@ -357,4 +358,10 @@ int delete(int value, bst* bst_l) {
 
     return 1;
 
+}
+
+int destroy_bst(bst* bst_l) {
+    post_order(bst_l->Head, free);
+    free(bst_l);
+    return 0;
 }
