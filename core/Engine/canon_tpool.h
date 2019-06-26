@@ -49,6 +49,7 @@ struct threads_cust{
     callback f1;
     callback f2;
     pthread_cond_t* cond;
+    void* f1_args;
 };
 
 struct funcs_t {
@@ -64,7 +65,7 @@ void pool_kill(thpool_t* tpool);
 
 /*custom thread with specified behaviour
  * not tied to job queues*/
-int cust_thread(callback f, callback f2, pthread_cond_t* cond, thpool_t* pool);
+int cust_thread(callback f, callback f2, pthread_cond_t* cond, thpool_t* pool, void* f1_args);
 
 //Polls the threads for its information
 int poll(thpool_t* tpool);

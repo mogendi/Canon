@@ -216,13 +216,21 @@ void cust_work(cust* cust_args) {
         cust_args->thread->pool->working += 1;
         pthread_mutex_unlock(&cust_args->thread->pool->poolmutex);
 
-        //cust_args->f1();
-    }
+        void* ret = cust_args->f1(cust_args->f1_args);
+        if (ret != NULL)
+            cust_args->f2(ret);
 
+        pthread_mutex_lock(&cust_args->thread->pool->poolmutex);
+        cust_args->thread->pool->working = 0;
+        pthread_mutex_unlock(&cust_args->thread->pool->poolmutex);
+    }
+    pthread_mutex_lock(&cust_args->thread->pool->poolmutex);
+    cust_args->thread->pool->alive -= 1;
+    pthread_mutex_unlock(&cust_args->thread->pool->poolmutex);
 
 }
 
-int cust_thread(callback f, callback f2, pthread_cond_t* cond, thpool_t* pool) {
+int cust_thread(callback f, callback f2, pthread_cond_t* cond, thpool_t* pool, void* f1_args) {
     pthread_mutex_lock(&pool->poolmutex);
 
     pool->size += 1;
@@ -241,6 +249,7 @@ int cust_thread(callback f, callback f2, pthread_cond_t* cond, thpool_t* pool) {
     cust_args->cond = cond;
     cust_args->f1 = f;
     cust_args->f2 = f2;
+    cust_args->f1_args = f1_args;
 
     pthread_create(&pool->thpool_arr[pool->size]->threadid, NULL, (void *)cust_work, (void *)cust_args);
     pthread_detach(pool->thpool_arr[pool->size]->threadid);
