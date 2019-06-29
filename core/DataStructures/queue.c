@@ -86,7 +86,7 @@ request_t* Dequeue(queue *Q){
  * Returns 0 if the processes is successful
  * 1 otherwise
  * @Paramas: A - origin queue, B - Target queue,
- * size - number of elements to map */
+ * size - number of elements to map*/
 int map(queue* A, queue* B, int size) {
     if(A->size < size) {
         printf("Origin queue size too small\n");
@@ -94,13 +94,41 @@ int map(queue* A, queue* B, int size) {
     }
 
     int loopv = 0;
+
     request_t* shared_loc[size];
-    for (loopv; loopv < (size-1); loopv++) {
+
+    time_t original = time(NULL), access_time;
+
+    pthread_mutex_lock(&A->rwmutex);
+
+    for (; loopv < (size-1); loopv++) {
+        access_time = time(NULL);
         shared_loc[loopv] = Dequeue(A);
+        if((access_time - original) > 15){
+            pthread_mutex_unlock(&A->rwmutex);
+            printf("Read too costly, aborting;");
+            return loopv;
+        }
     }
+
+    pthread_mutex_unlock(&A->rwmutex);
+
+    pthread_mutex_lock(&B->rwmutex);
+
     for(loopv = 0; loopv < (size-1); loopv++) {
         Enqueue(shared_loc[loopv], B);
+
+        access_time = time(NULL);
+
+        if((access_time - original) > 15){
+            pthread_mutex_unlock(&B->rwmutex);
+            printf("Read/write too costly, aborting;");
+            return loopv;
+        }
     }
+    pthread_mutex_unlock(&B->rwmutex);
+
+    return loopv;
 }
 
 int destroy_q(queue* Q) {

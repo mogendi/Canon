@@ -33,7 +33,11 @@ void KeyValueDerive(char *HeaderLine,char *Key,char *Value){
     i=0;j=0;
 }
 
-void URLParse(request_t *Req){
+
+/*           Parser API
+ * ---------------------------------
+ * */
+void urlparse(request_t *Req){
     char *ReqlEd = strdup(Req->req_line);
     Req->method = strtok(ReqlEd, " ");
     Req->URL = strtok(NULL, " ");
@@ -41,7 +45,7 @@ void URLParse(request_t *Req){
     Log(Req);
 }
 
-void HeaderDeriver(request_t *Req, char* EditableMsg){
+void headerparse(request_t *Req, char* EditableMsg){
     const char delim[] = "\r\n";
     const int Size = getpagesize()/8;
     hashtable_t *HeaderFields = ht_create(Size/2);
@@ -69,7 +73,7 @@ void HeaderDeriver(request_t *Req, char* EditableMsg){
         KeyValueDerive(hf, field, hvalue);
     }
     Req->Headers = HeaderFields;
-    URLParse(Req);
+    urlparse(Req);
 }
 
 void HTTPMsgParse(request_t* Req){
@@ -95,5 +99,5 @@ void HTTPMsgParse(request_t* Req){
         fflush(stdout);
     }
 
-    HeaderDeriver(Req, EditableMSG);
+    headerparse(Req, EditableMSG);
 }
