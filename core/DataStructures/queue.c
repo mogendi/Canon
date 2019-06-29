@@ -104,7 +104,7 @@ int map(queue* A, queue* B, int size) {
     for (; loopv < (size-1); loopv++) {
         access_time = time(NULL);
         shared_loc[loopv] = Dequeue(A);
-        if((access_time - original) > 15){
+        if((access_time - original) > 3){
             pthread_mutex_unlock(&A->rwmutex);
             printf("Read too costly, aborting;");
             return loopv;
@@ -120,7 +120,7 @@ int map(queue* A, queue* B, int size) {
 
         access_time = time(NULL);
 
-        if((access_time - original) > 15){
+        if((access_time - original) > 6){
             pthread_mutex_unlock(&B->rwmutex);
             printf("Read/write too costly, aborting;");
             return loopv;
