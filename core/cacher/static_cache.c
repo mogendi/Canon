@@ -3,38 +3,37 @@
 //
 
 #include "mutex.h"
-#include "../DataStructures/request.h"
-#include "request_cacher.h"
+#include "static_cache.h"
+#include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "datastructures/bst.h"
+
 
 /*
- * Explicitly Caches Requests
- * */
+ *                  CACHE NODE FUNCTIONS
+ * -------------------------------------------------*/
 
-/*The stored types are requests therefore
- * a method of deriving integers from
- * their message is necessary
- * */
-static int dry_hash( int size, request_t* bst_l) {
+static fim_t* create_cache_node(char* file_name,
+                                time_t expiry, cache_t* parent) {
 
-    unsigned long int hashval;
-    int i = 0;
+    fim_t* entry = (fim_t *)malloc(sizeof(struct cache_node));
+    if(entry == NULL)
+        return NULL;
 
-    // Convert our string to an integer
-    while( hashval < ULONG_MAX && i < strlen( bst_l->MSG ) && bst_l->MSG[i] != "\r") {
-        hashval = hashval << 8;
-        hashval += bst_l->MSG[ i ];
-        i++;
-    }
+    entry->f_headers = *create_file_header(file_name);
+    entry->creat_time = time(NULL);
+    entry->expiry = expiry;
+    entry->hits = 0;
+    entry->parent = parent;
+    entry->f_data = NULL;
+    entry->valid = 0;
+    pthread_mutex_init(&entry->cn_lock, NULL);
 
-    return hashval % size;
 }
 
-
-static int find_val(  );
 
 /*
  *                 CACHE API IMPL
@@ -44,6 +43,4 @@ cache_data* cache_init() {
     cache_data* bst_l = create_bst();
     if(bst_l == NULL)
         return NULL;
-
-    
 }

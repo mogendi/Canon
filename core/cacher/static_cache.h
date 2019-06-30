@@ -7,34 +7,67 @@
 
 #endif //CANON_REQUEST_CACHER_H
 
-#include "DataStructures/request.h"
-#include "DataStructures/bst.h"
+#include <zconf.h>
+#include "datastructures/bst.h"
+#include "./can_file.h"
 
 #define HIT 0
 #define MIS 1
-#define LIM 1000 /*Cache size limit*/
+#define LIM 100 /*Cache size limit*/
 
-/* Extends BSTs logic to cache requests.
+/* Extends BSTs logic to cache static resources.
  * Is an implementation of "weighted"
  * LFU algorithm, that takes into consideration
  * both time of last request access and how often
- * the request is searched for.
+ * the static resource is searched for.
  * */
 
 typedef struct bst_p cache_data;
 
+typedef struct cache_node fim_t;
+
+typedef struct cache cache_t;
+
+struct cache {
+    cache_data* data;
+
+    char* static_file_dir;
+    dir_t* dir;
+
+    int size;
+};
+
+struct cache_node {
+    file_t f_headers;
+    char* f_data;
+
+    cache_t* parent;
+
+    u_int32_t hits;
+
+   int valid;
+   unsigned dirty:1;
+   time_t expiry;
+   time_t creat_time;
+   time_t update;
+
+   pthread_mutex_t cn_lock;
+};
+
+
+/*
+ * On start-up, all the files in the static
+ * file directory are given a cache entry
+ * */
 cache_data* cache_init();
 
-/*
- * Will return the requests response if it found
- * the request in the cache data, return NULL otherwise
- * */
-resp_t* cache_search( request_t* Req, cache_data* cache );
 
-/*
- * Force the cache to update it's data tree
- * and clean the Oldest and lest frequently used
- * value
- * */
+
+int cache_destroy();
+
+
+fim_t* cache_search( char* fname, cache_data* cache );
+
+
 int force_update(cache_data* cache);
 
