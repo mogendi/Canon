@@ -1,5 +1,4 @@
 #include "canon_tpool.h"
-#include "../DataStructures/queue.h"
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
