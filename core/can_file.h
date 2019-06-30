@@ -63,7 +63,7 @@ file_t* create_file_header(char* path);
 
 dir_t* create_dir(char* path);
 
-int crc(file_t f_walk);
+u_int32_t crc(file_t* f_walk);
 
 file_t make_copy_file(file_t f_headers, char* path);
 

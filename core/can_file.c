@@ -11,23 +11,24 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <dirent.h>
+#include "crc32.h"
 
 /*Hash func for f_name_hash*/
 static long int hash (char* str) {
     unsigned long hash = 5381;
     int c;
 
-    while ((c = *str++))
+    while ((c = *str++) != NULL)
         hash = ((hash << 5) + hash) + hash * 33 + c;
 
-    return hash;
+    return hash % 65536;
 }
 
 /*get file name from path*/
 static char*  get_file_name(char* path) {
     struct stat s;
     if(stat(path, &s) == 0) {
-        if (s.st_mode & S_IFREG)
+        if (s.st_mode && S_IFREG)
             return basename(strdup(path));
         else return NULL;
     } else return NULL;
@@ -108,7 +109,8 @@ file_t* create_file_header(char* path) {
     f_walk->path = path;
 
     f_walk->fname = get_file_name(path);
-    f_walk->crc32 = crc(*f_walk);
+
+    f_walk->crc32 = crc(f_walk);
 
     long int f_name_hash = hash(f_walk->fname);
 
@@ -185,6 +187,20 @@ file_t make_copy_file(file_t f_headers, char* path) {
     return *f_header_l;
 }
 
-int crc(file_t f_walk) {
-    return 0;
+u_int32_t crc(file_t* f_walk) {
+    f_walk->fd = open(f_walk->path, O_RDWR, S_IRUSR);
+    if(f_walk->fd == -1) {
+        perror("open");
+    }
+    stat(f_walk->path, &f_walk->info);
+
+    char* cont_temp = (char *)mmap(NULL, f_walk->info.st_size, PROT_READ, MAP_PRIVATE, f_walk->fd, 0);
+    printf("%s\n", cont_temp);
+    fflush(stdout);
+    u_int32_t crc = crc32_text( cont_temp, f_walk->info.st_size );
+    f_walk->crc32 = crc;
+
+    munmap(cont_temp, f_walk->info.st_size);
+    close(f_walk->fd);
+    return crc;
 }
