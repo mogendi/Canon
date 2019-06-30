@@ -147,12 +147,13 @@ void walk(char* path, dir_t* dir_walk) {
         if(entry->d_type == DT_REG)
             dir_size++;
     }
+    closedir(dir_l);
 
-    char* dir_entries[dir_size];
-    dir->data = dir_entries;
+    dir_l = opendir(dir->path);
+    dir->data = (char**)(malloc(sizeof(char *) * dir_size));
 
     int loop_v = 0;
-    while((entry = readdir(dir_l)) != NULL) {
+    while((entry = readdir(dir_l)) != NULL && loop_v<dir_size) {
         dir->data[loop_v] = entry->d_name;
         loop_v++;
     }
