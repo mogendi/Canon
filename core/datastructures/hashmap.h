@@ -3,6 +3,10 @@
 
 #define _XOPEN_SOURCE 500 /* Enable certain library functions (strdup) on linux.  See feature_test_macros(7) */
 
+/*
+ * TODO: ht_to_text()
+ * */
+
 typedef struct entry_s entry_t;
 
 typedef struct hashtable_s hashtable_t;
