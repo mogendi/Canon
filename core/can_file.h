@@ -15,6 +15,21 @@ typedef struct dir_s dir_t;
 
 typedef struct stat stat_t;
 
+typedef enum {
+    jpg,
+    png,
+    exe,
+
+    txt,
+    html,
+    css,
+    js,
+    py,
+    php,
+    ts,
+    rs,
+} ext;
+
 struct file {
     int fd;
 
@@ -25,6 +40,7 @@ struct file {
     char* fname;
     int fname_hash;
     stat_t info;
+    ext extention;
 
     int valid;
     u_int32_t crc32;

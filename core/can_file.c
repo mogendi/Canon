@@ -43,6 +43,55 @@ static char* get_dir_name(char* path) {
 }
 
 
+static ext get_ext(file_t* file) {
+    char* f_name = strdup(file->fname);
+    char* name = strtok(f_name, ".");
+    char* exte = strtok(NULL, ".");
+    if(strcmp(exte, "png") == 0) {
+        return png;
+    }
+
+    if(strcmp(exte, "exe") == 0) {
+        return exe;
+    }
+
+    if(strcmp(exte, "jpg") == 0) {
+        return jpg;
+    }
+
+    if(strcmp(exte, "txt") == 0) {
+        return txt;
+    }
+
+    if(strcmp(exte, "css") == 0) {
+        return css;
+    }
+
+    if(strcmp(exte, "html") == 0) {
+        return html;
+    }
+
+    if(strcmp(exte, "js") == 0) {
+        return js;
+    }
+
+    if(strcmp(exte, "rs") == 0) {
+        return rs;
+    }
+
+    if(strcmp(exte, "py") == 0) {
+        return py;
+    }
+
+    if(strcmp(exte, "php") == 0) {
+        return php;
+    }
+
+    if(strcmp(exte, "ts") == 0) {
+        return ts;
+    }
+}
+
 /*                  API IMPL
  * -----------------------------------------
  * */
@@ -63,6 +112,7 @@ file_t* create_file_header(char* path) {
     f_walk->dir = dirname(strdup(path));
     f_walk->valid = 0;
     f_walk->fd = 0;
+    f_walk->extention = get_ext(f_walk);
 
     return f_walk;
 }
