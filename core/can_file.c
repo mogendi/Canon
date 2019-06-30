@@ -90,6 +90,10 @@ static ext get_ext(file_t* file) {
     if(strcmp(exte, "ts") == 0) {
         return ts;
     }
+
+    if(strcmp(exte, "mpeg") == 0) {
+        return mpeg;
+    }
 }
 
 /*                  API IMPL

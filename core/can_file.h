@@ -19,6 +19,7 @@ typedef enum {
     jpg,
     png,
     exe,
+    mpeg,
 
     txt,
     html,
