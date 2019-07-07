@@ -68,6 +68,10 @@ u_int32_t crc(file_t* f_walk);
 file_t make_copy_file(file_t f_headers, char* path);
 
 /*assumes path is a dir*/
-void walk(char* path, dir_t* dir_walk);
+void walk_dir(dir_t* dir);
+
+char** walk_path(char* path);
+
+void merge_path(char* path, dir_t* dir);
 
 #endif //CANON_CAN_FILE_H

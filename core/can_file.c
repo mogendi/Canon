@@ -129,35 +129,82 @@ dir_t* create_dir(char* path) {
         return NULL;
     dir->path = path;
     dir->name = basename(strdup(path));
-    walk(NULL, dir);
+    walk_dir(dir);
     return dir;
 }
 
-void walk(char* path, dir_t* dir_walk) {
-    dir_t* dir;
-    if(path != NULL) {
-        dir = create_dir(path);
-    } else { dir = dir_walk; }
+void walk_dir(dir_t* dir) {
+    struct stat s;
+    if(dir == NULL) {
+        return; }
 
     struct dirent* entry;
     DIR* dir_l = opendir(dir->path);
 
     int dir_size = 0;
     while((entry = readdir(dir_l)) != NULL) {
-        if(entry->d_type == DT_REG)
-            dir_size++;
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+            continue;
+        dir_size++;
     }
     closedir(dir_l);
+
+    dir->size = dir_size;
 
     dir_l = opendir(dir->path);
     dir->data = (char**)(malloc(sizeof(char *) * dir_size));
 
     int loop_v = 0;
-    while((entry = readdir(dir_l)) != NULL && loop_v<dir_size) {
-        dir->data[loop_v] = entry->d_name;
+    while((entry = readdir(dir_l)) != NULL && loop_v < dir_size) {
+        stat(entry->d_name, &s);
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+            continue;
+        if(S_ISDIR(s.st_mode))
+            merge_path(entry->d_name, dir);
+        else
+            dir->data[loop_v] = entry->d_name;
+        printf("%s\n", entry->d_name);
         loop_v++;
     }
     closedir(dir_l);
+}
+
+char** walk_path(char* path) {
+    struct dirent* entry;
+    struct stat s;
+    DIR* dir_l = opendir(path);
+    if(dir_l == NULL){
+        if(path != NULL){
+            char** data = (char**)malloc(sizeof(char*) * 2);
+            data[0] = path;
+            return data;
+        }
+        else
+            return NULL;
+    }
+
+    int dir_size = 0;
+    while( (entry = readdir(dir_l)) != NULL) {
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+            continue;
+        dir_size++;
+    }
+    closedir(dir_l);
+
+    dir_l = opendir(path);
+    char** data = (char**)malloc(sizeof(char*) * dir_size);
+
+    int loop_V = 0;
+    while((entry = readdir(dir_l)) != NULL && loop_V < dir_size) {
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+            continue;
+        data[loop_V] = entry->d_name;
+        loop_V++;
+    }
+
+    closedir(dir_l);
+    return data;
+
 }
 
 /*make a copy of file at f_headers at path*/
@@ -202,4 +249,26 @@ u_int32_t crc(file_t* f_walk) {
     munmap(cont_temp, f_walk->info.st_size);
     close(f_walk->fd);
     return crc;
+}
+
+/*Assumes the path is a directory path*/
+void merge_path(char* path, dir_t* dir) {
+    char** data = walk_path(path);
+    int path_size = sizeof(data)/sizeof(char*);
+    dir->size += path_size;
+    char** cont = dir->data;
+    char** new_cont = (char**)malloc((sizeof(*new_cont) * dir->size));
+    //Copy the contents into new_cont
+    int loop_v = 0;
+    while(loop_v < ( dir->size - path_size )) {
+        new_cont[loop_v] = dir->data[loop_v];
+        loop_v++;
+    }
+    loop_v = 0;
+    while(loop_v <  path_size ) {
+        new_cont[dir->size + loop_v] = data[loop_v];
+        loop_v++;
+    }
+    dir->data = new_cont;
+    free(cont);
 }
