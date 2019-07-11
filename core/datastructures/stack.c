@@ -59,9 +59,10 @@ void_list pop_n(stack* stack_l, int iter) {
     }
     int loop_v = iter;
     pthread_mutex_lock(&stack_l->lock);
-    while(loop_v--) {
+    while(loop_v >= 0) {
         ret[loop_v] = stack_l->table[loop_v];
         stack_l->table[loop_v] = NULL;
+        loop_v--;
     }
     stack_l->pos = stack_l->pos - iter;
     if( stack_l->pos != 0 || stack_l->top != NULL )
@@ -82,11 +83,11 @@ status push(stack* stack_l, void* data) {
     pthread_mutex_lock(&stack_l->lock);
     if(stack_l->pos >= lim || stack_l->pos >= stack_l->size) {
         printf("Stack limit reached, push failed\n");
-        return
+        return 1;
     }
-    stack_l->pos++;
     stack_l->table[stack_l->pos] = data;
     stack_l->top = stack_l->table[stack_l->pos];
+    stack_l->pos++;
     pthread_mutex_unlock(&stack_l->lock);
 }
 
@@ -105,13 +106,23 @@ status push_n(stack* stack_l, void_list data, int items) {
     }
 
     pthread_mutex_lock(&stack_l->lock);
-    while(items--) {
+    items = items -1;
+    while(items >= 0) {
         if(stack_l->pos < stack_l->size-1) {
-            stack_l->pos++;
             stack_l->table[stack_l->pos] = data[items];
+            stack_l->pos++;
+            items--;
         }
     }
     stack_l->top = stack_l->table[stack_l->pos];
     pthread_mutex_unlock(&stack_l->lock);
 
+}
+
+void read_stack(stack* stack_l, const char* format) {
+    int point = stack_l->pos-1;
+    while(point >= 0) {
+        printf(format, stack_l->table[point]);
+        point--;
+    }
 }

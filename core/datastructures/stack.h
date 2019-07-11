@@ -1,3 +1,6 @@
+#ifndef STACK_H
+#define STACK_H
+
 #define atom 2
 #define micro 8
 #define mini 32
@@ -7,11 +10,12 @@
 
 #include <pthread.h>
 #include <zconf.h>
+#include <stdio.h>
 
 /* Explicitly defined stack, with a pre defined
     size property. 
     
-    The stack data is tored in a table (can be randomly invoked) 
+    The stack data is stored in a table (can be randomly invoked)
     though  the pushes and pops are standard algorithimically
                                                       
                      ----------------
@@ -61,3 +65,8 @@ stack* new_stack(int size);
 status destroy(stack* stack_l);
 
 void_list destroy_safe(stack* stack_l);
+
+
+void read_stack(stack* stack_l, const char* format);
+
+#endif
