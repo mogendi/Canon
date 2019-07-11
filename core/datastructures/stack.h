@@ -5,6 +5,9 @@
 #define small 256
 #define lim 1024
 
+#include <pthread.h>
+#include <zconf.h>
+
 /* Explicitly defined stack, with a pre defined
     size property. 
     
@@ -21,7 +24,7 @@ push [data]--->     |                | ---> pop [address at the top]
 
 typedef struct stack_p stack;
 
-#ifdef LINUX
+#ifdef __unix__
     typedef u_int32_t status;
     #include <pthread.h>
 #endif
@@ -34,10 +37,10 @@ typedef struct stack_p stack;
 
 typedef void** void_list;
 
-struct stack {
+struct stack_p {
     void* top; 
     void_list table; /* Data table */
-    unsigned pos:10  /* Pos at data table */
+    unsigned pos:10;  /* Pos at data table */
     const u_int32_t size; /* Local limit */
 
     pthread_mutex_t lock; /* Mutext primitives */
