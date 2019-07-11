@@ -17,7 +17,7 @@ stack* new_stack(int size) {
     stack_l->table[0] = NULL;
     stack_l->size = size;
     stack_l->pos = 0;
-    pthread_mutex_init(stack_l->lock);
+    pthread_mutex_init(&stack_l->lock, NULL);
     return stack_l;
 }
 
@@ -29,7 +29,7 @@ status destroy(stack* stack_l) {
 }
 
 void_list destroy_safe(stack* stack_l) {
-    void_list ret = stack_l->data;
+    void_list ret = stack_l->table;
     free(stack_l);
 }
 
@@ -38,12 +38,12 @@ void* pop(stack* stack_l) {
         printf("Stack error: No stack\n");
         return NULL;
     }
-    pthread_mutex_lock(stack_l->lock);
+    pthread_mutex_lock(&stack_l->lock);
     void* ret = stack_l->top;
     stack_l->top = stack_l->table[stack_l->pos-1];
     stack_l->table[stack_l->pos] = NULL;
     stack_l->pos--;
-    pthread_mutex_unlock(stack_l->lock);
+    pthread_mutex_unlock(&stack_l->lock);
     return ret;
 }
 
@@ -58,15 +58,15 @@ void_list pop_n(stack* stack_l, int iter) {
         printf("Data error\n");
     }
     int loop_v = iter;
-    pthread_mutex_lock(stack_l->lock);
+    pthread_mutex_lock(&stack_l->lock);
     while(loop_v--) {
         ret[loop_v] = stack_l->table[loop_v];
         stack_l->table[loop_v] = NULL;
     }
     stack_l->pos = stack_l->pos - iter;
-    if( !(stack_l->pos == 0) || !(stack_l->top == NULL) )
+    if( stack_l->pos != 0 || stack_l->top != NULL )
         stack_l->top = stack_l->table[stack_l->pos];
-    pthread_mutex_unlock(stack_l->lock);
+    pthread_mutex_unlock(&stack_l->lock);
     return ret;
 }
 
@@ -79,15 +79,15 @@ status push(stack* stack_l, void* data) {
         printf("Stack error: Please provide valid data\n");
         return 1;
     }
-    pthread_mutex_lock(stack_l->lock);
-    if(stack_l->pos >= lim || stack_l->pos >= size) {
+    pthread_mutex_lock(&stack_l->lock);
+    if(stack_l->pos >= lim || stack_l->pos >= stack_l->size) {
         printf("Stack limit reached, push failed\n");
         return
     }
     stack_l->pos++;
     stack_l->table[stack_l->pos] = data;
     stack_l->top = stack_l->table[stack_l->pos];
-    pthread_mutex_unlock(stack_l->lock);
+    pthread_mutex_unlock(&stack_l->lock);
 }
 
 status push_n(stack* stack_l, void_list data, int items) {    
@@ -104,14 +104,14 @@ status push_n(stack* stack_l, void_list data, int items) {
         return 1;
     }
 
-    pthread_mutex_lock(stack_l->lock);
+    pthread_mutex_lock(&stack_l->lock);
     while(items--) {
         if(stack_l->pos < stack_l->size-1) {
             stack_l->pos++;
             stack_l->table[stack_l->pos] = data[items];
         }
     }
-    stack_l->top = stack_l->data[stack_l->pos];
-    pthread_mutex_unlock(stack_l->lock);
+    stack_l->top = stack_l->table[stack_l->pos];
+    pthread_mutex_unlock(&stack_l->lock);
 
 }

@@ -41,7 +41,7 @@ struct stack_p {
     void* top; 
     void_list table; /* Data table */
     unsigned pos:10;  /* Pos at data table */
-    const u_int32_t size; /* Local limit */
+    u_int32_t size; /* Local limit */
 
     pthread_mutex_t lock; /* Mutext primitives */
 };
