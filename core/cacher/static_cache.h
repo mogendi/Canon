@@ -13,7 +13,7 @@
 
 #define HIT 0
 #define MIS 1
-#define LIM 100 /*Cache size limit*/
+#define LIM 1000 /*Cache size limit*/
 
 /* Extends BSTs logic to cache static resources.
  * Is an implementation of "weighted"
@@ -31,7 +31,6 @@ typedef struct cache cache_t;
 struct cache {
     cache_data* data;
 
-    char* static_file_dir;
     dir_t* dir;
 
     int size;
@@ -43,10 +42,11 @@ struct cache_node {
 
     cache_t* parent;
 
-    u_int32_t hits;
+    int hits;
 
-   int valid;
-   unsigned dirty:1;
+    unsigned valid:1;
+    unsigned dirty:1;
+
    time_t expiry;
    time_t creat_time;
    time_t update;
@@ -59,14 +59,16 @@ struct cache_node {
  * On start-up, all the files in the static
  * file directory are given a cache entry
  * */
-cache_data* cache_init();
+cache_t* cache_init(char* path);
 
 
 
 int cache_destroy();
 
 
-fim_t* cache_search( char* fname, cache_data* cache );
+fim_t* cache_search( char* fname, cache_t* cache);
+
+int cache_remove(cache_t* cache);
 
 
 int force_update(cache_data* cache);
