@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "DataStructures/request.h"
+#include "datastructures/request.h"
 #define RECV 0
 #define SEND 1
 
