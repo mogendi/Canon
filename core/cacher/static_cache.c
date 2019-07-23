@@ -36,7 +36,7 @@ static fim_t* create_cache_node(char* file_name,
     entry->f_data = NULL;
     entry->valid = 0;
     pthread_mutex_init(&entry->cn_lock, NULL);
-
+    retun entry
 }
 
 static cache_t* create_cache(cache_data* data, char* dir) {
