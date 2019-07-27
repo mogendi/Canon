@@ -14,7 +14,7 @@
 #include "crc32.h"
 
 /*Hash func for f_name_hash*/
-static long int hash (char* str) {
+long int hash (char* str) {
     unsigned long hash = 5381;
     int c;
 
