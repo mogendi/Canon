@@ -8,22 +8,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <time.h>
 
 
 
 /*                        TYPE IMPLEMENTATIONS & PROTOTYPES
 ------------------------------------------------------------------------------------*/
-
-struct node{
-    int val;
-    void* request;
-    node_t* left;
-    node_t* right;
-    bst* bst_l; //Head of the parent BST
-    int freq;
-    time_t access;
-};
 
 int check_balance(node_t* root);
 void place_value(node_t* root, node_t* in);

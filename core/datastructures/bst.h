@@ -4,6 +4,7 @@
 
 #ifndef CANON_BST_H
 #define CANON_BST_H
+#include <time.h>
 
 /*
  * Standard BST API where protocols can use the structure
@@ -31,6 +32,16 @@ typedef struct bst_p bst;
 struct bst_p{
     node_t* Head;
     int size;
+};
+
+struct node{
+    int val;
+    void* request;
+    node_t* left;
+    node_t* right;
+    bst* bst_l; //Head of the parent BST
+    int freq;
+    time_t access;
 };
 
 /*                  BST API
