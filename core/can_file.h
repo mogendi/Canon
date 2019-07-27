@@ -81,4 +81,6 @@ data_t* walk_path(char* path);
 
 char** merge_path(char* path, char* path2);
 
+static long int hash (char* str);
+
 #endif //CANON_CAN_FILE_H
