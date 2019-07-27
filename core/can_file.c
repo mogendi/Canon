@@ -215,7 +215,7 @@ u_int32_t crc(file_t* f_walk) {
 
     char* cont_temp = (char *)mmap(NULL, f_walk->info.st_size, PROT_READ, MAP_PRIVATE, f_walk->fd, 0);
     u_int32_t crc = crc32_text( cont_temp, f_walk->info.st_size );
-    f_walk->crc32 = crc;
+    //f_walk->crc32 = crc;
 
     munmap(cont_temp, f_walk->info.st_size);
     close(f_walk->fd);
