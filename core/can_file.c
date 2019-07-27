@@ -200,7 +200,6 @@ file_t make_copy_file(file_t f_headers, char* path) {
         close(f_headers.fd);
         close(f_header_l->fd);
         munmap(o_content, f_headers.info.st_size);
-        munmap(i_cont, f_header_l->info.st_size);
     }
 
     return *f_header_l;
