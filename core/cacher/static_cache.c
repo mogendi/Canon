@@ -29,7 +29,7 @@ static fim_t* create_cache_node(char* file_name,
         return NULL;
 
     entry->f_headers = *new_file_header(file_name);
-    entry->creat_time = time(NULL);
+    entry->create_time = time(NULL);
     entry->expiry = expiry;
     entry->hits = 0;
     entry->parent = parent;

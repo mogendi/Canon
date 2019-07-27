@@ -48,7 +48,7 @@ struct cache_node {
     unsigned dirty:1;
 
    time_t expiry;
-   time_t creat_time;
+   time_t create_time;
    time_t update;
 
    pthread_mutex_t cn_lock;
