@@ -222,7 +222,7 @@ u_int32_t crc(file_t* f_walk) {
 }
 
 /*Assumes the path is a directory path*/
-char** merge_path(char* path, char* path2) {
+data_t* merge_path(char* path, char* path2) {
     data_t* path_data = walk_path(path);
     data_t* path2_data = walk_path(path2);
     if(path_data == NULL || path2_data == NULL) {
@@ -244,7 +244,10 @@ char** merge_path(char* path, char* path2) {
         new_dir_info[loop + path_data->size] = path2_data->data[loop];
         loop++;
     }
+    data_t* ret = (data_t*)malloc(sizeof(data_t));
+    ret->size = (path_data->size + path2_data->size) - 1;
+    ret->data = new_dir_info;
     free(path_data);
     free(path2_data);
-    return new_dir_info;
+    return ret;
 }

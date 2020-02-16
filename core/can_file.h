@@ -79,7 +79,7 @@ void walk_dir(dir_t* dir);
 
 data_t* walk_path(char* path);
 
-char** merge_path(char* path, char* path2);
+data_t* merge_path(char* path, char* path2);
 
 long int hash (char* str);
 

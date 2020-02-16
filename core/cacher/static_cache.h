@@ -21,6 +21,7 @@
  * both time of last request access and how often
  * the static resource is searched for.
  * */
+#define HITS_MAX 10
 
 typedef struct bst_p cache_data;
 
@@ -48,7 +49,6 @@ struct cache_node {
     unsigned dirty:1;
 
    time_t expiry;
-   time_t create_time;
    time_t update;
 
    pthread_mutex_t cn_lock;
@@ -65,11 +65,12 @@ cache_t* cache_init(char* path);
 
 int cache_destroy();
 
-
 fim_t* cache_search( char* fname, cache_t* cache);
 
-int cache_remove(cache_t* cache);
+fim_t* cache_search_stable(char* fname, cache_t* cache);
+
+int cache_remove(fim_t* cache_node);
 
 
-int force_update(cache_data* cache);
+int force_update(cache_t* cache);
 

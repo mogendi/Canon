@@ -18,9 +18,18 @@ struct entry_s {
     struct entry_s *next;
 };
 
+struct entries_tb{
+    int hash_value;
+    struct entries_tb *next;
+};
+
+typedef struct entries_tb entriesTb;
+
 struct hashtable_s {
     int size;
     struct entry_s **table;
+    entriesTb* entries;
+    entriesTb* entry_last;
 };
 
 // Hash a string for a particular hash table.
@@ -36,6 +45,7 @@ hashtable_t *ht_create( int size ) {
 
     hashtable_t *hashtable = NULL;
     int i;
+    entriesTb *entries, *el;
 
     if( size < 1 ) return NULL;
 
@@ -52,7 +62,21 @@ hashtable_t *ht_create( int size ) {
         hashtable->table[i] == NULL;
     }
 
+    if( (entries = malloc(sizeof(entriesTb))) == NULL) {
+        return NULL;
+    }
+
+    if( (el = malloc(sizeof(entriesTb))) == NULL) {
+        return NULL;
+    }
+
+    entries->next = el;
+    entries->hash_value = 0;
+    el->hash_value = 0;
+
     hashtable->size = size;
+    hashtable->entries = entries;
+    hashtable->entry_last = el;
 
     return hashtable;
 }
@@ -103,6 +127,16 @@ void ht_set( hashtable_t *hashtable, char *key, char *value ) {
     entry_t *last = NULL;
 
     bin = ht_hash( hashtable, key );
+
+    if(hashtable->entries->hash_value == 0)
+        hashtable->entries->hash_value = bin;
+    else if(hashtable->entry_last->hash_value == 0) { hashtable->entry_last->hash_value = bin;}
+    else {
+        entriesTb* el;
+        if((el = malloc(sizeof(entriesTb))) == NULL))
+            return;
+        hashtable->entry_last = el;
+    }
 
     next = hashtable->table[ bin ];
 
