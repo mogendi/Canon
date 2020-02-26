@@ -14,10 +14,23 @@ request_t *createRequest(int sock_fd){
         printf("Couldn't create Request failed\n");
         return NULL;
     }
+    args_t* args;
+    if((args = (args_t*)malloc(sizeof(args_t))) == NULL)
+        return NULL;
+    reql->args = args;
+
+    chunk_t* chunks;
+    if((chunks = (chunk_t*)malloc(sizeof(chunk_t))) == NULL)
+        return NULL;
+    reql->chunks = chunks;
+    reql->chunks->trailers = ht_create(5);
+    reql->chunks->ext = (exts_t*)malloc(sizeof(exts_t));
+    reql->chunks->ext->query = NULL;
+    reql->trailers = 0;
+    reql->chunks->chunk_size = 0;
 
     reql->MSG = NULL;
-    reql->req_line = NULL;
-    reql->Headers = NULL;
+    reql->Headers = ht_create(20);
     reql->body = NULL;
     reql->sockfd = sock_fd;
     reql->secs = time(NULL)%3600;
@@ -50,7 +63,7 @@ void kill_Req(request_t* reql){
     free(reql);
 }
 
-int comp_req(request_t* reql, request_t* reqr){
+/*int comp_req(request_t* reql, request_t* reqr){
 
     int rl_flag = strcmp(reql->req_line, reqr->req_line);
     int ht_flag = ht_compare(reql->Headers, reqr->Headers);
@@ -58,4 +71,4 @@ int comp_req(request_t* reql, request_t* reqr){
     if(rl_flag == 0 && ht_flag == 0) {
         return 0;
     } else { return 1; }
-}
+}*/

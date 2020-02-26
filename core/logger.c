@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "datastructures/hashmap.h"
-#include "datastructures/request.h"
+#include "request.h"
 
 void PrintLog(request_t *Req)
 {
@@ -17,7 +17,7 @@ void PrintLog(request_t *Req)
     tm_info = localtime(&timer);
 
     strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
-    printf("[%s] %s\n", buffer, Req->req_line);
+    printf("[%s]\n", buffer);
 }
 
 void Log(request_t *Req){
@@ -27,7 +27,7 @@ void Log(request_t *Req){
         return;
     }
     fprintf(logfile,"Request on %d\n", Req->sockfd);
-    fprintf(logfile,"\tMethod: %s, URL: %s\n", Req->method, Req->URL);
+    fprintf(logfile,"\tMethod: %d\n", Req->method);
     fprintf(logfile,"\tHost: %s\n", ht_get(Req->Headers, "Host"));
     fprintf(logfile, "\tConnection: %s\n\n\n",ht_get(Req->Headers, "Connection"));
     fflush(logfile);

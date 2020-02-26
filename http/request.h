@@ -7,12 +7,13 @@
 /*Holds the implementation for both request and response types*/
 typedef struct request request_t;
 typedef struct resp resp_t;
+typedef struct args args_t;
+typedef struct chunk chunk_t;
+typedef struct exts exts_t;
 
 struct request
 {
     int method;
-
-    char *body;
 
     int sockfd;
 
@@ -36,6 +37,7 @@ struct request
     char* port_end;
 
     char* args_start;
+    char* args_end;
 
     int http_minor;
     int http_major;
@@ -48,9 +50,17 @@ struct request
     int plus_in_uri;
     int quoted_uri;
 
+    args_t* args;
+
     char* headers_start;
     char* headers_end;
     hashtable_t *Headers;
+
+    char *body;
+    chunk_t* chunks;
+    unsigned trailers:1;
+    char* trailers_start;
+    char* trailers_end;
 
 };
 
@@ -61,6 +71,27 @@ struct resp {
     char* reason;
     hashtable_t *Headers;
     char* body;
+};
+
+struct args{
+    char *lvalue;
+    char *query;
+    char *query_arg; //arguments/fragment/singular values
+    int len;
+    args_t* chain; //children (condensed)
+};
+
+struct chunk{
+    char* body;
+    int chunk_size;
+    hashtable_t* trailers;
+    exts_t* ext;
+};
+
+struct exts{
+    char* query;
+    char* query_arg;
+    exts_t* ext;
 };
 
 request_t *createRequest(int sock_fd);

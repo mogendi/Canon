@@ -2,6 +2,13 @@
 #define PARSER_H_INCLUDED
 
 #include "request.h"
+#include "datastructures/stack.h"
+
+/* Sources:
+ * https://tomassetti.me/guide-parsing-algorithms-terminology/
+ *
+ * The algorithms implemented are mostly shift reduce FSMs
+ */
 
 #define HTTP_GET 2
 #define HTTP_HEAD 3
@@ -24,6 +31,10 @@
 #define HTTP_INVALID_REQUEST 11
 #define HTTP_INVALID_VERSION 12
 #define HTTP_REQ_LINE_OK 13;
+#define HTTP_HEADERS_OK 14;
+#define HTTP_ARGS_OK 15;
+#define HTTP_CHUNKS_OK 16;
+#define HTTP_NO_CATEGORY 17;
 
 #define HTTP_CONTINUE 100
 #define HTTP_SWITCHING_PROTOCOLS 101
@@ -67,17 +78,14 @@
 #define HTTP_VERSION_NOT_SUPPORTED 505
 #define HTTP_INSUFFICIENT_STORAGE 507
 
+int parse_request_line(request_t* r);
 
-char* get_url(request_t* Req);
+int parse_header_lines(request_t* r);
 
-char* get_body(request_t* Req);
+int parse_args(request_t* r);
 
-void urlparse(request_t *Req);
+int parse_chunked(request_t* r);
 
-void headerparse(request_t *Req, char* EditableMsg);
-
-//The function that parses the http messages into relevant data structures
-void HTTPMsgParse(request_t* Req);
-
+char* combine_str(stack* s, int size_ml);
 
 #endif // PARSER_H_INCLUDED

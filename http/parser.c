@@ -25,8 +25,8 @@
 #define cmp9(m, c0, c1, c2, c3, c4, c5, c6, c7, c8)                        \
     m[0] == c0 && m[1] == c1 && m[2] == c2 && m[3] == c3 && m[4] == c4 && m[5] == c5 && m[6] == c6 && m[7] == c7 && m[8] == c8
 
-#define CR                  '\r'
-#define LF                  '\n'
+#define CR '\r'
+#define LF '\n'
 
 
 char* quick_scan(char* msg, char delim){
@@ -49,11 +49,37 @@ char* empty_line_search(char* msg) {
     return NULL;
 }
 
-void dup_str(char* p1, char* p2, char* loc) {
+char* dup_str(char* p1, char* p2) {
+    int size_ml = (p2 - p1) + 2;
+    char *loc = (char*)malloc(sizeof(char)*size_ml);
     int size =  (p2-p1)+1;
     int i = 0;
-    for(; i<size; i++)
-        loc[i] = *(p1 + i);
+    for(; i<=size; i++) {
+        *(loc + i) = *(p1 + i);
+        if (i == size)
+            loc[i] = '\0';
+    }
+    return loc;
+}
+
+char* combine_str(stack* s, int size_ml){
+    char *str = (char*)malloc((sizeof(char)*size_ml)+1);
+    if(str == NULL)
+        return NULL;
+    char *i = &str[size_ml-1], *j; int x = size_ml-1;
+    char *sb = NULL, *se  = NULL;
+    str[size_ml] = '\0';
+    for(; i>str; ){
+        se = pop(s);
+        sb = pop(s);
+        j = se;
+        for(; j>=sb; j--){
+            *(str+x) = *j;
+            x--;
+        }
+        i = &str[x] - 1;
+    }
+    return str;
 }
 
 /*           Parser API
@@ -190,6 +216,7 @@ int parse_request_line(request_t* r) {
                 }
                 if ((*p < 'A' || *p > 'Z') && *p != '_' && *p != '-')
                     return HTTP_INVALID_METHOD;
+                break;
             case method_space_st:
                 if (*p == '/') {
                     r->uri_start = p;
@@ -236,7 +263,7 @@ int parse_request_line(request_t* r) {
                 }
                 break;
             case host_start_st:
-                r->host_start = p - 1;
+                r->host_start = p;
                 if (*p == '[') {
                     st = host_ip_literal_st;
                     break;
@@ -288,10 +315,11 @@ int parse_request_line(request_t* r) {
                 if (*p >= '0' && *p <= '9') {
                     break;
                 }
-
+                if(*(p-1) == ':')
+                    r->port_start = p;
                 switch (*p) {
                     case '/':
-                        r->port_end = p;
+                        r->port_end = p-1;
                         r->uri_start = p;
                         st = resource_slash;
                         break;
@@ -303,6 +331,7 @@ int parse_request_line(request_t* r) {
                 switch (*p) {
                     case ' ':
                         r->uri_end = p;
+                        r->args_end = p;
                         st = ver_st;
                         break;
                     case '?':
@@ -318,18 +347,18 @@ int parse_request_line(request_t* r) {
                 break;
             case ver_st:
                 switch (*p) {
-                    case 'h':
+                    case 'H':
                         st = ver_h_st;
-                        break;
-                    case 't':
+                        p+=1;
+                    case 'T':
                         st = ver_ht_st;
                         p += 1;
-                        if ((*p) == 't')
+                        if ((*p) == 'T')
                             st = ver_htt_st;
                         else { return HTTP_BAD_REQUEST; }
-                    case 'p':
+                    case 'P':
                         st = ver_http_st;
-                        break;
+                        p+=1;
                     case '/':
                         st = md_st;
                         break;
@@ -338,6 +367,7 @@ int parse_request_line(request_t* r) {
                 }
                 break;
             case md_st:
+                p+=1;
                 if (*p < '1' || *p > '9')
                     return HTTP_INVALID_REQUEST;
                 r->http_major = *p - '0';
@@ -351,7 +381,7 @@ int parse_request_line(request_t* r) {
                 st = minor_d_st;
                 break;
             case minor_d_st:
-                r->http_minor = *p + '0';
+                r->http_minor = *p - '0';
                 if (r->http_minor > 99)
                     return HTTP_INVALID_REQUEST;
                 st = crlf_st;
@@ -388,49 +418,63 @@ int parse_request_line(request_t* r) {
                     default:
                         return HTTP_INVALID_REQUEST;
                 }
-            default:
-                return HTTP_BAD_REQUEST;
         }
     }
 done:
     if (r->req_end == NULL)
         r->req_end = p;
     r->ver = r->http_major * 10 + r->http_minor;
-    return HTTP_REQ_LINE_OK
+    return HTTP_REQ_LINE_OK;
 }
 
-int parse_header_line(request_t* r) {
+int parse_header_lines(request_t* r) {
     typedef enum {
         start_st,
         value_st,
         space_st,
-        empty_line,
         almost_done_line,
         done_line_st,
-        done_headers_st
     }state;
     state st = start_st;
-    char* headers_end = empty_line_search(r->MSG);
-    r->headers_start = r->req_end+1;
-    r->headers_end = headers_end;
-    char *p = r->headers_start;
-    char *name_b, *name_e, *value_b, *value_e;
+
+    char* headers_end;
+    if(r->trailers == 1){
+        headers_end = empty_line_search(r->trailers_start);
+    } else { headers_end = empty_line_search(r->MSG);}
+    if(headers_end == NULL)
+        return HTTP_BAD_REQUEST;
+
+    if(*(headers_end+1) != NULL) {
+        r->body = headers_end+1;
+    }
+
+    char *p, *name_b, *lim_t;
+    if(!r->trailers) {
+        r->headers_start = r->req_end + 2;
+        r->headers_end = headers_end;
+        p = r->headers_start;
+        name_b = r->headers_start;
+        lim_t = r->headers_end;
+    } else {
+        r->trailers_end = headers_end;
+        p = r->trailers_start;
+        name_b = r->trailers_start;
+        lim_t = r->trailers_end;
+    }
+
+    char *name_e = NULL, *value_b = NULL, *value_e = NULL;
     char *name_l, *value_l;
-    name_b = r->headers_start;
-    for(p; p<r->headers_end; p++){
-        if(p == headers_end)
-            return HTTP_BAD_REQUEST;
+
+hl_loop:
+    for(; p<lim_t; p++){
         switch(st){
             case start_st:
                 if(*p == ' ')
                     return HTTP_BAD_REQUEST;
                 if(*p == ':'){
                     name_e = p-1;
-                    char name[(name_e-name_b)+1];
-                    dup_str(name_b, name_e, name);
-                    name_l = name;
+                    st = space_st;
                 }
-                st = space_st;
                 break;
             case space_st:
                 if(*p == CR) {
@@ -441,33 +485,301 @@ int parse_header_line(request_t* r) {
                     return HTTP_BAD_REQUEST;
                 if(*p == ' ')
                     value_b = p +1;
-                else { value_b = p; }
                 st = value_st;
+                break;
             case value_st:
                 switch(*p) {
                     case CR:
                         if((*(p-1) == ' ' && *(p-2) == ' ' ) || *(p+1) != LF)
                             return HTTP_BAD_REQUEST;
+                        value_e = p-1;
+                    case LF:
+                        st = done_line_st;
                 }
-                st = done_line_st;
+                break;
             case almost_done_line:
                 if(*p+1 != LF)
                     return HTTP_BAD_REQUEST;
                 name_b = p-1;
                 st = done_line_st;
+                break;
             case done_line_st:
-                value_e = p-2;
-                int size = (value_e-value_b) +1;
-                char value[size];
-                dup_str(value_b, value_e, value);
-                value_l = value;
-                name_b = p+1;
-                goto done_line;
+                if((headers_end - p) <= 4) {
+                    goto done_headers;
+                } else { goto done_line; }
         }
-done_line:
-            ht_set(r->Headers, name_l, value_l);
-            st = start_st;
+
     }
 
-    return HTTP_BAD_REQUEST;
+done_line:
+    name_l = dup_str(name_b, name_e);
+    value_l = dup_str(value_b, value_e);
+    ht_set(r->Headers, name_l, value_l);
+    st = start_st;
+    name_b = p + 1;
+    goto hl_loop;
+
+done_headers:
+    name_l = dup_str(name_b, name_e);
+    value_l = dup_str(value_b, value_e);
+    ht_set(r->Headers, name_l, value_l);
+    return HTTP_HEADERS_OK;
+}
+
+int parse_args(request_t* r){
+    typedef enum {
+        start_st,
+        query_st,
+        q_args_st,
+    }state;
+
+    char *value_st = NULL, *query_str = NULL, *args_st = NULL;
+    char *value_end = NULL, *query_end = NULL, *args_end = NULL;
+    if(r->complex_uri != 1)
+        return HTTP_NO_CATEGORY;
+    value_st = r->uri_start+1;
+    query_str = r->args_start+1;
+    char *p = r->uri_start+1;
+    r->args->len = 0;
+    state st = start_st;
+    args_t* arg_cur = r->args;
+
+    for(; p<=r->args_end; p++){
+        switch(st) {
+            case start_st:
+                if(*p == '/'){
+                    value_end = p-1;
+                    arg_cur->len++;
+                    arg_cur->lvalue = dup_str(value_st, value_end);
+                    value_st = p+1;
+                    arg_cur->chain = (args_t*)malloc(sizeof(args_t));
+                    arg_cur = arg_cur->chain;
+                    break;
+                }
+                if(*p == '?' || *p == '#'){
+                    arg_cur->lvalue = dup_str(value_st, (p-1));
+                    st = query_st;
+                    break;
+                }
+                if(*p == '='){
+                    value_end = p-1;
+                    arg_cur->len++;
+                    arg_cur->query = dup_str(value_st, value_end);
+                    args_st = p+1;
+                    st = q_args_st;
+                    break;
+                }
+                break;
+            case query_st:
+                if(*p == '='){
+                    query_end = p-1;
+                    arg_cur->query = dup_str(query_str, query_end);
+                    args_st = p+1;
+                    st = q_args_st;
+                    break;
+                }
+                if(*p == ' ' && p == r->uri_end)
+                    goto done_args;
+                break;
+            case q_args_st:
+                if(*p == '&'){
+                    args_end = p-1;
+                    query_str = p+1;
+                    arg_cur->query_arg = dup_str(args_st, args_end);
+                    arg_cur->chain = (args_t*)malloc(sizeof(args_t));
+                    arg_cur = arg_cur->chain;
+                    st = query_st;
+                    break;
+                }
+                if(*p == ' ' && p == r->args_end){
+                    args_end = p-1;
+                    arg_cur->query_arg = dup_str(args_st, args_end);
+                    goto done_args;
+                }
+        }
+    }
+done_args:
+    return HTTP_ARGS_OK;
+}
+
+int parse_chunked(request_t* r) {
+    if(ht_get(r->Headers, "transfer-coding") == NULL)
+        return HTTP_NO_CATEGORY;
+
+    typedef enum {
+        start_st,
+        size_st,
+        ext_q_st,
+        ext_a_st,
+        data_st,
+        lc_st,
+        trailers_st,
+        end_line_st,
+    }state;
+
+    int lc_flag = 0;
+
+    char *args_b = NULL, *data_b = NULL;
+    char *args_e = NULL, *data_e = NULL;
+    char *q_b = NULL, *q_e = NULL;
+    char *curr_p = NULL;
+    int dsize = 0;
+    char *p = r->headers_end;
+    if(p == NULL || *p == '\0')
+        return HTTP_NO_CATEGORY;
+    state st = start_st;
+    char ch;
+    stack *str_= new_stack(lim);
+    exts_t* curr = r->chunks->ext;
+    char* chunks_end  = empty_line_search(p);
+    while(p<chunks_end){
+        p = p+1;
+        switch(st){
+            case start_st:
+                if(*p >= '0' && *p <= '9'){
+                    dsize= dsize + (*p - '0');
+                    st = size_st;
+                    break;
+                }
+                ch = (*p | 0x20);
+                if(ch >='a' && ch<='f'){
+                    dsize = dsize + (ch - 'a' + 10);
+                    st = size_st;
+                    break;
+                }
+                return HTTP_CLIENT_ERROR;
+            case size_st:
+                if(*p >= '0' && *p <= '9'){
+                    dsize = dsize*16 + (*p - '0');
+                    break;
+                }
+                ch = (*p | 0x20);
+                if(ch >='a' && ch<='f'){
+                    dsize = dsize*16 + (ch - 'a' + 10);
+                    break;
+                }
+                if(*p == ' ')
+                    break;
+                if(*p == ';'){
+                    if(*(p+1) != ' ')
+                        q_b = p+1;
+                    else {
+                        q_b = p+2;
+                    }
+
+                    r->chunks->chunk_size += dsize;
+                    st = ext_q_st;
+                    break;
+                }
+                if(*p == CR && *(p+1) == LF){
+                    r->chunks->chunk_size += dsize;
+                    curr_p = p+(dsize-1)+2;
+                    data_b = p+2;
+                    st = data_st;
+                    break;
+                }
+            case ext_q_st:
+extension:
+                if(*p == '='){
+                    q_e = p-1;
+                    curr->query = dup_str(q_b, q_e);
+                    args_b = p+1;
+                    st = ext_a_st;
+                    break;
+                }
+                if(*p == CR && *(p+1) == LF){
+                    curr->ext = (exts_t*)malloc(sizeof(exts_t));
+                    curr = curr->ext;
+                    if(st == lc_st)
+                        goto last_chunk;
+                    st = data_st;
+                    break;
+                }
+                break;
+            case ext_a_st:
+                switch(*p){
+                    case CR:
+                        if (*(p+1) == LF) {
+                            args_e = p - 1;
+                            curr->query_arg = dup_str(args_b, args_e);
+                            curr->ext = (exts_t *) malloc(sizeof(exts_t));
+                            curr = curr->ext;
+                            break;
+                        }
+                    case ' ':
+                        break;
+                    case LF:
+                        data_b = p+1;
+                        curr_p = p + (dsize);
+                        if(lc_flag)
+                            goto last_chunk;
+                        st = data_st;
+                        break;
+                }
+                break;
+            case data_st:
+                if(p<curr_p)
+                    break;
+                if(p == curr_p && *(p+1) == CR){
+                    data_e = p;
+                    push(str_, data_b);
+                    push(str_, data_e);
+                    if(*(p+3) == '0'){
+                        st = lc_st;
+                        lc_flag = 1;
+                        break;
+                    }
+                    dsize = 0;
+                    p+=2;
+                    st = start_st;
+                    break;
+                }
+            case lc_st:
+                if(*p != '0')
+                    break;
+                if(*p == ';'){
+                    if(*(p+1) != ' ')
+                        q_b = p+1;
+                    else { break; }
+
+                    goto extension;
+                }
+                if(*p == '0') {
+                    p += 1;
+                    goto last_chunk;
+                }
+
+last_chunk:
+                if(*p == CR){
+                    if(*(p+2) == CR) {
+                        p = p+2;
+                        st = end_line_st;
+                        break;
+                    } else {
+                        st = trailers_st;
+                        break;
+                    }
+                }
+                break;
+            case trailers_st:
+                r->trailers = 1;
+                r->trailers_start = p+1;
+                r->trailers_end = empty_line_search(r->trailers_start);
+                parse_header_lines(r);
+                goto done_chunks;
+
+            case end_line_st:
+                if(*p == CR && *(p+1) == LF && (p+1) == chunks_end)
+                    goto done_chunks;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+done_chunks:
+    r->chunks->body = combine_str(str_, r->chunks->chunk_size);
+    r->body = r->chunks->body;
+    return HTTP_CHUNKS_OK;
 }

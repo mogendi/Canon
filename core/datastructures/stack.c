@@ -40,9 +40,12 @@ void* pop(stack* stack_l) {
     }
     pthread_mutex_lock(&stack_l->lock);
     void* ret = stack_l->top;
-    stack_l->top = stack_l->table[stack_l->pos-1];
-    stack_l->table[stack_l->pos] = NULL;
+    if(stack_l->pos != 0)
+        stack_l->table[stack_l->pos-1] = NULL;
+    else{ stack_l->table[stack_l->pos] = NULL; }
     stack_l->pos--;
+    if(stack_l->pos != 0)
+        stack_l->top = stack_l->table[stack_l->pos-1];
     pthread_mutex_unlock(&stack_l->lock);
     return ret;
 }

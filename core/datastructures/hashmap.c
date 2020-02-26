@@ -85,7 +85,7 @@ hashtable_t *ht_create( int size ) {
 // Hash a string for a particular hash table.
 int ht_hash( hashtable_t *hashtable, char *key ) {
 
-    unsigned long int hashval;
+    unsigned long int hashval = 0;
     int i = 0;
 
     // Convert our string to an integer
@@ -128,16 +128,6 @@ void ht_set( hashtable_t *hashtable, char *key, char *value ) {
 
     bin = ht_hash( hashtable, key );
 
-    if(hashtable->entries->hash_value == 0)
-        hashtable->entries->hash_value = bin;
-    else if(hashtable->entry_last->hash_value == 0) { hashtable->entry_last->hash_value = bin;}
-    else {
-        entriesTb* el;
-        if((el = malloc(sizeof(entriesTb))) == NULL))
-            return;
-        hashtable->entry_last = el;
-    }
-
     next = hashtable->table[ bin ];
 
     while( next != NULL && next->key != NULL && strcmp( key, next->key ) > 0 ) {
@@ -153,6 +143,18 @@ void ht_set( hashtable_t *hashtable, char *key, char *value ) {
 
         // Nope, could't find it.  Time to grow a pair.
     } else {
+        if(hashtable->entries->hash_value == 0)
+            hashtable->entries->hash_value = bin;
+        else if(hashtable->entry_last->hash_value == 0) { hashtable->entry_last->hash_value = bin;}
+        else {
+            entriesTb* el;
+            if((el = malloc(sizeof(entriesTb))) == NULL)
+                return;
+            hashtable->entry_last = el;
+            el->hash_value = bin;
+            el->next = NULL;
+        }
+
         newpair = ht_newpair( key, value );
 
         // We're at the start of the linked list in this bin.
@@ -186,7 +188,7 @@ char *ht_get( hashtable_t *hashtable, char *key ) {
     }
 
     // Did we actually find anything?
-    if( pair == NULL || pair->key == NULL || strcmp( key, pair->key ) != 0 ) {
+    if( pair == NULL || pair->key == NULL ) {
         return NULL;
     } else {
         return pair->value;

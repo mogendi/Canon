@@ -6,7 +6,8 @@
 #define mini 32
 #define tiny 64
 #define small 256
-#define lim 1024
+#define mid 1024
+#define lim 2048
 
 #include <pthread.h>
 #include <zconf.h>
@@ -16,7 +17,7 @@
     size property. 
     
     The stack data is stored in a table (can be randomly invoked)
-    though  the pushes and pops are standard algorithimically
+    though  the pushes and pops are standard algorithmically
                                                       
                      ----------------
 push [data]--->     |                | ---> pop [address at the top]
