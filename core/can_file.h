@@ -9,6 +9,23 @@
 #include <unitypes.h>
 #include <zconf.h>
 
+#define FOREACH_EXT(EXT)    \
+    EXT(jpg)                \
+    EXT(png)                \
+    EXT(ico)                \
+    EXT(mpeg)               \
+    EXT(txt)                \
+    EXT(html)               \
+    EXT(css)                \
+    EXT(js)                 \
+    EXT(py)                 \
+    EXT(php)                \
+    EXT(ts)                 \
+    EXT(rs)                 \
+
+#define GENERATE_ENUM(ENUM) ENUM
+#define GENERATE_STRING(STRING)
+
 typedef struct file file_t;
 
 typedef struct dir_s dir_t;
@@ -20,7 +37,7 @@ typedef struct data_p data_t;
 typedef enum {
     jpg,
     png,
-    exe,
+    ico,
     mpeg,
 
     txt,
@@ -43,7 +60,9 @@ struct file {
     char* fname;
     int fname_hash;
     stat_t info;
+
     ext extention;
+    char* ext_txt;
 
     int valid;
     u_int32_t crc32;

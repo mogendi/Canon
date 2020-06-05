@@ -24,7 +24,6 @@ file(GLOB INC6 ./core/cacher/*.h)
 include_directories(./core)
 include_directories(./http)
 add_executable(canon test.c ${SRC1} ${SRC2} ${SRC3} ${SRC4} ${SRC5} ${SRC6}
-                                       ${INC1} ${INC2} ${INC3} ${INC4} ${INC5} ${INC6}
-                                          core/crc32.c core/crc32.h core/Engine/canon_procp.h)
+                                       ${INC1} ${INC2} ${INC3} ${INC4} ${INC5} ${INC6})
 
 

@@ -6,14 +6,14 @@
  * Implementation of the parsing logic
  * */
 
-#include <stdio.h>
+/*#include <stdio.h>
 #include <stdlib.h>
 #include "datastructures/queue.h"
 #include "Engine/canon_tpool.h"
 #include "request.h"
 #include "mutex.h"
 #include "connection.h"
-#include "parser.h"
+#include "parser.h"*/
 
 /*int main(){
     int port_c;

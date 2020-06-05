@@ -23,7 +23,6 @@ request_t *createRequest(int sock_fd){
     if((chunks = (chunk_t*)malloc(sizeof(chunk_t))) == NULL)
         return NULL;
     reql->chunks = chunks;
-    reql->chunks->trailers = ht_create(5);
     reql->chunks->ext = (exts_t*)malloc(sizeof(exts_t));
     reql->chunks->ext->query = NULL;
     reql->trailers = 0;
@@ -33,7 +32,6 @@ request_t *createRequest(int sock_fd){
     reql->Headers = ht_create(20);
     reql->body = NULL;
     reql->sockfd = sock_fd;
-    reql->secs = time(NULL)%3600;
     reql->resp = NULL;
     return reql;
 }
@@ -46,7 +44,6 @@ resp_t *createResp(request_t* Req) {
     }
 
     resp_l->Req = Req;
-    resp_l->Headers = NULL;
     resp_l->body = NULL;
     resp_l->status = 0;
     resp_l->reason = NULL;

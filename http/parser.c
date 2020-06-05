@@ -523,6 +523,7 @@ done_headers:
     name_l = dup_str(name_b, name_e);
     value_l = dup_str(value_b, value_e);
     ht_set(r->Headers, name_l, value_l);
+    r->body = r->headers_end;
     return HTTP_HEADERS_OK;
 }
 

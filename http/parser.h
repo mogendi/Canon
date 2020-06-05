@@ -26,15 +26,15 @@
 #define HTTP_PATCH 15
 #define HTTP_TRACE 16
 
-#define HTTP_CLIENT_ERROR 10
 #define HTTP_INVALID_METHOD 10
 #define HTTP_INVALID_REQUEST 11
 #define HTTP_INVALID_VERSION 12
-#define HTTP_REQ_LINE_OK 13;
-#define HTTP_HEADERS_OK 14;
-#define HTTP_ARGS_OK 15;
-#define HTTP_CHUNKS_OK 16;
-#define HTTP_NO_CATEGORY 17;
+#define HTTP_REQ_LINE_OK 13
+#define HTTP_HEADERS_OK 14
+#define HTTP_ARGS_OK 15
+#define HTTP_CHUNKS_OK 16
+#define HTTP_NO_CATEGORY 17
+#define HTTP_CLIENT_ERROR 18
 
 #define HTTP_CONTINUE 100
 #define HTTP_SWITCHING_PROTOCOLS 101
@@ -46,7 +46,7 @@
 #define HTTP_NO_CONTENT 204
 #define HTTP_PARTIAL_CONTENT 206
 
-#define HTTP_SPECIAL_RESPONSE 00
+#define HTTP_SPECIAL_RESPONSE 300
 #define HTTP_MOVED_PERMANENTLY 301
 #define HTTP_MOVED_TEMPORARILY 302
 #define HTTP_SEE_OTHER 303
@@ -87,5 +87,7 @@ int parse_args(request_t* r);
 int parse_chunked(request_t* r);
 
 char* combine_str(stack* s, int size_ml);
+
+char* dup_str(char* p1, char* p2);
 
 #endif // PARSER_H_INCLUDED

@@ -47,52 +47,52 @@ static char* get_dir_name(char* path) {
 static ext get_ext(file_t* file) {
     char* f_name = strdup(file->fname);
     char* name = strtok(f_name, ".");
-    char* exte = strtok(NULL, ".");
-    if(strcmp(exte, "png") == 0) {
+    file->ext_txt = strtok(NULL, ".");
+    if(strcmp(file->ext_txt, "png") == 0) {
         return png;
     }
 
-    if(strcmp(exte, "exe") == 0) {
-        return exe;
+    if(strcmp(file->ext_txt, "ico") == 0) {
+        return ico;
     }
 
-    if(strcmp(exte, "jpg") == 0) {
+    if(strcmp(file->ext_txt, "jpg") == 0) {
         return jpg;
     }
 
-    if(strcmp(exte, "txt") == 0) {
+    if(strcmp(file->ext_txt, "txt") == 0) {
         return txt;
     }
 
-    if(strcmp(exte, "css") == 0) {
+    if(strcmp(file->ext_txt, "css") == 0) {
         return css;
     }
 
-    if(strcmp(exte, "html") == 0) {
+    if(strcmp(file->ext_txt, "html") == 0) {
         return html;
     }
 
-    if(strcmp(exte, "js") == 0) {
+    if(strcmp(file->ext_txt, "js") == 0) {
         return js;
     }
 
-    if(strcmp(exte, "rs") == 0) {
+    if(strcmp(file->ext_txt, "rs") == 0) {
         return rs;
     }
 
-    if(strcmp(exte, "py") == 0) {
+    if(strcmp(file->ext_txt, "py") == 0) {
         return py;
     }
 
-    if(strcmp(exte, "php") == 0) {
+    if(strcmp(file->ext_txt, "php") == 0) {
         return php;
     }
 
-    if(strcmp(exte, "ts") == 0) {
+    if(strcmp(file->ext_txt, "ts") == 0) {
         return ts;
     }
 
-    if(strcmp(exte, "mpeg") == 0) {
+    if(strcmp(file->ext_txt, "mpeg") == 0) {
         return mpeg;
     }
 }
@@ -117,7 +117,7 @@ file_t* new_file_header(char* path) {
     f_walk->fname_hash = (f_name_hash < -1) ? (f_name_hash *= -1): (f_name_hash);
     f_walk->dir = dirname(strdup(path));
     f_walk->valid = 0;
-    f_walk->fd = 0;
+    f_walk->fd = open(f_walk->path, O_RDONLY, S_IRUSR|S_IWUSR);
     f_walk->extention = get_ext(f_walk);
 
     return f_walk;

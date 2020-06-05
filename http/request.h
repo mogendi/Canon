@@ -13,16 +13,14 @@ typedef struct exts exts_t;
 
 struct request
 {
-    int method;
 
     int sockfd;
-
-    time_t secs;
-    resp_t* resp;
+    unsigned ka : 1;
 
     /*Parse literals*/
     char *MSG;
 
+    int method;
     char* req_start;
     char* req_end; //request line end
     char* method_end;
@@ -47,8 +45,6 @@ struct request
     unsigned has_fragment : 1;
 
     int complex_uri;
-    int plus_in_uri;
-    int quoted_uri;
 
     args_t* args;
 
@@ -62,6 +58,7 @@ struct request
     char* trailers_start;
     char* trailers_end;
 
+    char* resp;
 };
 
 
@@ -84,7 +81,6 @@ struct args{
 struct chunk{
     char* body;
     int chunk_size;
-    hashtable_t* trailers;
     exts_t* ext;
 };
 
