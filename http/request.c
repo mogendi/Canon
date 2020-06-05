@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "datastructures/hashmap.h"
+#include "hashmap.h"
 #include <time.h>
 
 request_t *createRequest(int sock_fd){

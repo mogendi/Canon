@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/sysinfo.h>
-#include "../mutex.h"
+#include "mutex.h"
 
 
 int THPOOL_ALIVE = 1;

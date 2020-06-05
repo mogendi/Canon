@@ -2,7 +2,7 @@
 #define PARSER_H_INCLUDED
 
 #include "request.h"
-#include "datastructures/stack.h"
+#include "stack.h"
 
 /* Sources:
  * https://tomassetti.me/guide-parsing-algorithms-terminology/

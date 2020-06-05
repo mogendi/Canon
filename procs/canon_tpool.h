@@ -1,7 +1,7 @@
 #ifndef CANON_TPOOL_H_INCLUDED
 #define CANON_TPOOL_H_INCLUDED
 
-#include "../datastructures/queue.h"
+#include "queue.h"
 
 
 /*

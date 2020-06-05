@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include "datastructures/bst.h"
+#include "bst.h"
 
 /*
  * TODO: Make the cache_init function take a

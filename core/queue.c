@@ -5,7 +5,7 @@
 #include "queue.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../mutex.h"
+#include "mutex.h"
 
 
 node* CreateNode(request_t *Req, node* next){

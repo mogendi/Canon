@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "datastructures/queue.h"
+#include "queue.h"
 
 #define rr_size 5;
 

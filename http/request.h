@@ -1,7 +1,7 @@
 #ifndef REQUEST_H_INCLUDED
 #define REQUEST_H_INCLUDED
 
-#include "datastructures/hashmap.h"
+#include "hashmap.h"
 #include <time.h>
 
 /*Holds the implementation for both request and response types*/

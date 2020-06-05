@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "datastructures/hashmap.h"
+#include "hashmap.h"
 #include "request.h"
 
 void PrintLog(request_t *Req)

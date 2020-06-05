@@ -8,7 +8,7 @@
 #endif //CANON_REQUEST_CACHER_H
 
 #include <zconf.h>
-#include "datastructures/bst.h"
+#include "bst.h"
 #include "./can_file.h"
 
 #define HIT 0
