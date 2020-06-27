@@ -72,13 +72,34 @@ u_int32_t crc32_table[] = {
         0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-u_int32_t crc32_text(char* text, size_t len) {
-    u_int32_t crc = 0xffffffff;
-    u_char c;
+u_int32_t crc32_text(unsigned char* text, size_t len) {
+    unsigned int crc = 0xffffffff, crc_b = 0xffffffff;
+    int fl = 0;
+    int rem = len%1024;
 
-    while(len--) {
-        crc = crc32_table [(crc & 0xFF) ^ *text++] ^ (crc >> 8);
+    if(len > 1024){
+        int a = len/1024;
+        if(rem > 0)
+            fl = 1;
+        for(int i = 0; i < a + fl; i++){
+            if(fl && i == a)
+                len = rem;
+            else
+                len = 1024;
+            while (len--) {
+                crc_b = crc32_table[(crc_b & 0xFF) ^ *text++] ^ (crc_b >> 8);
+            }
+            crc += crc_b;
+            crc_b = 0xffffffff;
+        }
+        goto return_p;
+    } else {
+        while (len--) {
+            crc = crc32_table[(crc & 0xFF) ^ *text++] ^ (crc >> 8);
+        }
     }
+
+    return_p:
     return crc ^ 0xffffffff;
 
 }

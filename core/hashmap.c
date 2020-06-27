@@ -106,11 +106,11 @@ entry_t *ht_newpair( char *key, char *value ) {
         return NULL;
     }
 
-    if( ( newpair->key = strdup( key ) ) == NULL ) {
+    if( ( newpair->key = strdup(key) ) == NULL ) {
         return NULL;
     }
 
-    if( ( newpair->value = strdup( value ) ) == NULL ) {
+    if( ( newpair->value = strdup(value) ) == NULL ) {
         return NULL;
     }
 
@@ -139,7 +139,7 @@ void ht_set( hashtable_t *hashtable, char *key, char *value ) {
     if( next != NULL && next->key != NULL && strcmp( key, next->key ) == 0 ) {
 
         free( next->value );
-        next->value = strdup( value );
+        next->value = strdup(value);
 
         // Nope, could't find it.  Time to grow a pair.
     } else {
@@ -202,11 +202,9 @@ void ht_destroy(hashtable_t *hashmap){
 
     while( bin != hashmap->size){
         pair = hashmap->table[bin];
-        if( pair == NULL || pair->key == NULL ){
-            /**/
-        } else {
+        if( pair != NULL && pair->key != NULL )
             free(pair);
-        }
+        bin++;
     }
     free(hashmap->table);
     free(hashmap);

@@ -8,7 +8,7 @@
 #include "mutex.h"
 
 
-node* CreateNode(request_t *Req, node* next){
+node* CreateNode(void* Req, node* next){
     node *new_n = (node *)malloc(sizeof(node));
     if(Req == NULL){
         printf("Null request: can't create queue node");
@@ -34,7 +34,7 @@ queue* CreateQ(){
     return new_q;
 }
 
-void Enqueue(request_t *Req,queue *Q){
+void Enqueue(void* Req,queue *Q){
     node* new_n = CreateNode(Req, NULL);
 
     if(Q == NULL)
@@ -55,8 +55,8 @@ void Enqueue(request_t *Req,queue *Q){
     pthread_mutex_unlock(&(Q->rwmutex));
 }
 
-request_t* Dequeue(queue *Q){
-    node* rn; request_t* req = NULL;
+void* Dequeue(queue *Q){
+    node* rn; void* req = NULL;
     int flag=0;
     pthread_mutex_lock(&(Q->rwmutex));
     switch(Q->size){
@@ -95,7 +95,7 @@ int map(queue* A, queue* B, int size) {
 
     int loopv = 0;
 
-    request_t* shared_loc[size];
+    void* shared_loc[size];
 
     time_t original = time(NULL), access_time;
 
@@ -136,7 +136,7 @@ int destroy_q(queue* Q) {
     node* cursor = Q->Head;
     while(cursor != NULL) {
         cursor = Q->Head;
-        kill_Req(cursor->Req);
+        kill_req(cursor->Req);
         Q->Head = cursor->next;
         free(cursor);
     }

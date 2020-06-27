@@ -9,23 +9,6 @@
 #include <unitypes.h>
 #include <zconf.h>
 
-#define FOREACH_EXT(EXT)    \
-    EXT(jpg)                \
-    EXT(png)                \
-    EXT(ico)                \
-    EXT(mpeg)               \
-    EXT(txt)                \
-    EXT(html)               \
-    EXT(css)                \
-    EXT(js)                 \
-    EXT(py)                 \
-    EXT(php)                \
-    EXT(ts)                 \
-    EXT(rs)                 \
-
-#define GENERATE_ENUM(ENUM) ENUM
-#define GENERATE_STRING(STRING)
-
 typedef struct file file_t;
 
 typedef struct dir_s dir_t;

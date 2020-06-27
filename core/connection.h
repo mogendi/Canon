@@ -21,8 +21,10 @@ struct sock_p{
 };
 
 typedef struct sock_p sock;
+int rcv(request_t* r);
+int snd(request_t* r);
 char* HTTPMsgTransfer(request_t *Req, int Flag, char* buff);
-sock HTTPConnectionGen(int PORT);
+sock* HTTPConnectionGen(int PORT);
 
 
 #endif //CANON_CONNECTION_H

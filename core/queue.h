@@ -7,7 +7,7 @@ typedef struct node_p node;
 typedef struct queue_p queue;
 
 struct node_p{
-    request_t *Req;
+    void *Req;
     node* next;
 };
 
@@ -19,7 +19,7 @@ struct queue_p{
     pthread_mutex_t rwmutex; /*Mutex lock for the queues types*/
 };
 
-node* CreateNode(request_t *Req, node* next);
+node* CreateNode(void *Req, node* next);
 
 //initialize the Qs types and its access monitor
 queue* CreateQ();
@@ -27,9 +27,9 @@ queue* CreateQ();
 /*
  * Ensure the Q and New node are not null
  * */
-void Enqueue(request_t* Req,queue *Q);
+void Enqueue(void* Req,queue *Q);
 
-request_t* Dequeue(queue *Q);
+void* Dequeue(queue *Q);
 
 /*
  * Maps a section(of specified size) of one queue
