@@ -32,6 +32,8 @@
 char* quick_scan(char* msg, char delim){
     char *p = msg;
     while(*p != delim && p<msg + strlen(msg)) {
+        if(*p == delim)
+            return p;
         p+=1;
     }
     if(*p == delim)

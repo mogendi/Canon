@@ -58,6 +58,10 @@ struct request
     char* trailers_start;
     char* trailers_end;
 
+    unsigned timeout : 1;
+
+    int bl;
+
     char* resp;
 };
 
@@ -90,12 +94,8 @@ struct exts{
     exts_t* ext;
 };
 
-request_t *createRequest(int sock_fd);
+request_t *create_request(int sock_fd);
 
-resp_t *createResp(request_t* Req);
-
-void kill_Req(request_t* reql);
-
-int comp_req(request_t* reql, request_t* reqr);
+void kill_req(request_t *r);
 
 #endif // REQUEST_H_INCLUDED

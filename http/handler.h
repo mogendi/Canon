@@ -25,9 +25,9 @@ typedef struct {
     char *reason;
 }status_line;
 
-status parse_routine(request_t* r);
+typedef __uint32_t fd;
 
-status handler(char* raw, int sockfd);
+status handler(request_t* r);
 
 
 #endif //CANON_HANDLER_H

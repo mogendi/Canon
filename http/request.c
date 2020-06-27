@@ -5,67 +5,84 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "hashmap.h"
 #include <time.h>
 
-request_t *createRequest(int sock_fd){
-    request_t *reql = (request_t*)malloc(sizeof(request_t));
-    if(reql == NULL){
+request_t *create_request(int sock_fd){
+    request_t *r = malloc(sizeof(request_t));
+    if(r == NULL){
         printf("Couldn't create Request failed\n");
         return NULL;
     }
     args_t* args;
     if((args = (args_t*)malloc(sizeof(args_t))) == NULL)
         return NULL;
-    reql->args = args;
+    r->args = args;
 
     chunk_t* chunks;
     if((chunks = (chunk_t*)malloc(sizeof(chunk_t))) == NULL)
         return NULL;
-    reql->chunks = chunks;
-    reql->chunks->ext = (exts_t*)malloc(sizeof(exts_t));
-    reql->chunks->ext->query = NULL;
-    reql->trailers = 0;
-    reql->chunks->chunk_size = 0;
+    r->chunks = chunks;
+    r->chunks->ext = (exts_t*)malloc(sizeof(exts_t));
+    r->chunks->ext->query = NULL;
+    r->trailers = 0;
+    r->chunks->chunk_size = 0;
 
-    reql->MSG = NULL;
-    reql->Headers = ht_create(20);
-    reql->body = NULL;
-    reql->sockfd = sock_fd;
-    reql->resp = NULL;
-    return reql;
+    r->MSG = NULL;
+    r->Headers = ht_create(20);
+    r->body = NULL;
+    r->sockfd = sock_fd;
+    r->resp = NULL;
+    r->bl = 0;
+    return r;
 }
 
-resp_t *createResp(request_t* Req) {
-    resp_t *resp_l = (resp_t*)malloc(sizeof(resp_t));
-    if(resp_l == NULL) {
-        printf("Couldn't create Resp");
-        return NULL;
+void kill_req(request_t *r){
+    if(r->Headers != NULL)
+        ht_destroy(r->Headers);
+    close(r->sockfd);
+    free(r->resp);
+
+    if(r->chunks != NULL) {
+        int nc = 1;
+        exts_t *e = r->chunks->ext, *ec;
+        while (nc) {
+            if (e->ext == NULL) {
+                free(e->query_arg);
+                free(e->query);
+                free(e);
+                nc = 0;
+                continue;
+            }
+            ec = e;
+            e = e->ext;
+            free(ec->query_arg);
+            free(ec->query);
+            free(ec);
+        }
+        free(r->chunks->body);
     }
 
-    resp_l->Req = Req;
-    resp_l->body = NULL;
-    resp_l->status = 0;
-    resp_l->reason = NULL;
-    return resp_l;
-}
-
-void kill_Req(request_t* reql){
-    if(reql->Headers == NULL){
-        //
-    } else {
-        ht_destroy(reql->Headers);
+    if(r->args != NULL) {
+        int na = 1;
+        args_t *a = r->args, *ac;
+        while (na) {
+            if (a->chain == NULL) {
+                free(a->query);
+                free(a->query_arg);
+                free(a);
+                na = 0;
+                continue;
+            }
+            ac = a;
+            a = a->chain;
+            free(ac->query_arg);
+            free(ac->query);
+            free(ac);
+        }
     }
-    free(reql->resp);
-    free(reql);
+
+
+    free(r);
 }
-
-/*int comp_req(request_t* reql, request_t* reqr){
-
-    int rl_flag = strcmp(reql->req_line, reqr->req_line);
-    int ht_flag = ht_compare(reql->Headers, reqr->Headers);
-
-    if(rl_flag == 0 && ht_flag == 0) {
-        return 0;
-    } else { return 1; }
-}*/
