@@ -77,6 +77,9 @@ u_int32_t crc32_text(unsigned char* text, size_t len) {
     int fl = 0;
     int rem = len%1024;
 
+    if(text == NULL)
+        return crc & 0xfffffff0;
+
     if(len > 1024){
         int a = len/1024;
         if(rem > 0)
