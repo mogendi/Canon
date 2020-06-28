@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unitypes.h>
 #include <zconf.h>
+#define NULL 0
 
 typedef struct file file_t;
 

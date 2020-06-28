@@ -2,6 +2,7 @@
 #define QUEUE_H_INCLUDED
 #include "request.h"
 #include "mutex.h"
+#define NULL 0
 
 typedef struct node_p node;
 typedef struct queue_p queue;

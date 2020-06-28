@@ -6,6 +6,7 @@
 /*
  * TODO: ht_to_text()
  * */
+#define NULL 0
 
 typedef struct entry_s entry_t;
 

@@ -5,6 +5,7 @@
 #ifndef CANON_BST_H
 #define CANON_BST_H
 #include <time.h>
+#define NULL 0
 
 /*
  * Standard BST API where protocols can use the structure
