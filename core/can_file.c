@@ -127,12 +127,17 @@ file_t* new_file_header(char* path) {
 
     f_walk->crc32 = crc(f_walk);
 
-    long int f_name_hash = hash(f_walk->fname);
+    long int f_name_hash;
+    f_walk->fd = open(f_walk->path, O_RDONLY, S_IRUSR);
+    if(f_walk->fd == -1)
+        f_walk->fname_hash = 0;
+    else{
+        f_name_hash = hash(f_walk->fname);
+        f_walk->fname_hash = (f_name_hash < -1) ? (f_name_hash *= -1): (f_name_hash);
+    }
 
-    f_walk->fname_hash = (f_name_hash < -1) ? (f_name_hash *= -1): (f_name_hash);
     f_walk->dir = dirname(strdup(path));
     f_walk->valid = 0;
-    f_walk->fd = open(f_walk->path, O_RDONLY, S_IRUSR);
     f_walk->extention = get_ext(f_walk);
 
     return f_walk;
@@ -188,7 +193,7 @@ data_t* walk_path(char* path) {
     closedir(dir_l);
 
     data_t* ret = (data_t*)malloc(sizeof(data_t));
-    ret->size = (size_t)size;
+    ret->size = (ssize_t)size;
     ret->data = data;
     return ret;
 }
@@ -227,7 +232,7 @@ u_int32_t crc(file_t* f_walk) {
     }
     stat(f_walk->path, &f_walk->info);
 
-    unsigned char* cont_temp = mmap(NULL, f_walk->info.st_size, PROT_READ, MAP_PRIVATE, f_walk->fd, 0);
+    unsigned char *cont_temp = mmap(NULL, f_walk->info.st_size, PROT_READ, MAP_PRIVATE, f_walk->fd, 0);
     u_int32_t crc = crc32_text( cont_temp, f_walk->info.st_size );
     //f_walk->crc32 = crc;
 

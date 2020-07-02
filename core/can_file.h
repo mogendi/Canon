@@ -8,7 +8,6 @@
 #include <sys/stat.h>
 #include <unitypes.h>
 #include <zconf.h>
-#define NULL 0
 
 typedef struct file file_t;
 
@@ -65,7 +64,7 @@ struct dir_s {
 /*Its necessary to retain the size info with the data*/
 struct data_p {
     char** data;
-    size_t size;
+    ssize_t size;
 };
 
 

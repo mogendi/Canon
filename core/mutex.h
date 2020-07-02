@@ -6,7 +6,6 @@
 #define CANON_MUTEX_H
 
 #include <pthread.h>
-#define NULL 0
 
 enum bool {true, false};
 

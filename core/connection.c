@@ -71,7 +71,7 @@ char* HTTPMsgTransfer(request_t *Req, int Flag, char* buff){
 }
 
 //returns an integer socket_fd bound to an address
-sock* HTTPConnectionGen(int PORT){
+sock* conn_gen(int PORT){
     int connection, opt = 1;
     struct sockaddr_in conn_addr;
 

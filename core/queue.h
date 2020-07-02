@@ -2,13 +2,12 @@
 #define QUEUE_H_INCLUDED
 #include "request.h"
 #include "mutex.h"
-#define NULL 0
 
 typedef struct node_p node;
 typedef struct queue_p queue;
 
 struct node_p{
-    void *Req;
+    void *r;
     node* next;
 };
 
@@ -20,17 +19,17 @@ struct queue_p{
     pthread_mutex_t rwmutex; /*Mutex lock for the queues types*/
 };
 
-node* CreateNode(void *Req, node* next);
+node* new_node(void *r, node *next);
 
 //initialize the Qs types and its access monitor
-queue* CreateQ();
+queue* new_q();
 
 /*
  * Ensure the Q and New node are not null
  * */
-void Enqueue(void* Req,queue *Q);
+void enqueue(void *r, queue *Q);
 
-void* Dequeue(queue *Q);
+void* dequeue(queue *Q);
 
 /*
  * Maps a section(of specified size) of one queue

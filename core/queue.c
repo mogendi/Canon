@@ -8,9 +8,9 @@
 #include "mutex.h"
 
 
-node* CreateNode(void* Req, node* next){
+node* new_node(void *r, node *next){
     node *new_n = (node *)malloc(sizeof(node));
-    if(Req == NULL){
+    if(r == NULL){
         printf("Null request: can't create queue node");
         return NULL;
     }
@@ -18,27 +18,27 @@ node* CreateNode(void* Req, node* next){
         printf("Queue error");
         return NULL;
     }
-    new_n->Req = Req;
+    new_n->r = r;
     new_n->next = next;
     return new_n;
 }
 
-queue* CreateQ(){
-    queue* new_q = (queue *)malloc(sizeof(queue));
-    if(new_q == NULL)
+queue* new_q(){
+    queue* nq = (queue *)malloc(sizeof(queue));
+    if(nq == NULL)
         exit(1);
-    new_q->Head = NULL;
-    new_q->Tail = NULL;
-    new_q->size = 0;
-    new_q->qlock = monitor_init(0);
-    return new_q;
+    nq->Head = NULL;
+    nq->Tail = NULL;
+    nq->size = 0;
+    nq->qlock = monitor_init(0);
+    return nq;
 }
 
-void Enqueue(void* Req,queue *Q){
-    node* new_n = CreateNode(Req, NULL);
+void enqueue(void *r, queue *Q){
+    node* new_n = new_node(r, NULL);
 
     if(Q == NULL)
-        Q = CreateQ();
+        Q = new_q();
     pthread_mutex_lock(&(Q->rwmutex));
     switch(Q->size){
         case 0:
@@ -55,7 +55,7 @@ void Enqueue(void* Req,queue *Q){
     pthread_mutex_unlock(&(Q->rwmutex));
 }
 
-void* Dequeue(queue *Q){
+void* dequeue(queue *Q){
     node* rn; void* req = NULL;
     int flag=0;
     pthread_mutex_lock(&(Q->rwmutex));
@@ -77,7 +77,7 @@ void* Dequeue(queue *Q){
     pthread_mutex_unlock(&(Q->rwmutex));
     toggle_monitor(Q->qlock, flag);
     if(rn != NULL)
-        req = rn->Req;
+        req = rn->r;
     free(rn);
     return req;
 }
@@ -103,7 +103,7 @@ int map(queue* A, queue* B, int size) {
 
     for (; loopv < (size-1); loopv++) {
         access_time = time(NULL);
-        shared_loc[loopv] = Dequeue(A);
+        shared_loc[loopv] = dequeue(A);
         if((access_time - original) > 3){
             pthread_mutex_unlock(&A->rwmutex);
             printf("Read too costly, aborting;");
@@ -116,7 +116,7 @@ int map(queue* A, queue* B, int size) {
     pthread_mutex_lock(&B->rwmutex);
 
     for(loopv = 0; loopv < (size-1); loopv++) {
-        Enqueue(shared_loc[loopv], B);
+        enqueue(shared_loc[loopv], B);
 
         access_time = time(NULL);
 
@@ -136,7 +136,7 @@ int destroy_q(queue* Q) {
     node* cursor = Q->Head;
     while(cursor != NULL) {
         cursor = Q->Head;
-        kill_req(cursor->Req);
+        kill_req(cursor->r);
         Q->Head = cursor->next;
         free(cursor);
     }

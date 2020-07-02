@@ -3,6 +3,7 @@
 //
 
 #include "crc32.h"
+#include <stdlib.h>
 
 
 u_int32_t crc32_table[] = {
@@ -72,13 +73,13 @@ u_int32_t crc32_table[] = {
         0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-u_int32_t crc32_text(unsigned char* text, size_t len) {
+u_int32_t crc32_text(unsigned char* text, ssize_t len) {
     unsigned int crc = 0xffffffff, crc_b = 0xffffffff;
     int fl = 0;
     int rem = len%1024;
 
     if(text == NULL)
-        return crc & 0xfffffff0;
+        return 0xfffffff0;
 
     if(len > 1024){
         int a = len/1024;
@@ -90,6 +91,8 @@ u_int32_t crc32_text(unsigned char* text, size_t len) {
             else
                 len = 1024;
             while (len--) {
+                if(text == 0x0 || text == NULL)
+                    return crc ^ 0xffffffff;
                 crc_b = crc32_table[(crc_b & 0xFF) ^ *text++] ^ (crc_b >> 8);
             }
             crc += crc_b;
