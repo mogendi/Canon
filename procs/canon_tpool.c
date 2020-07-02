@@ -58,7 +58,7 @@ thpool_t* pool_init(callback f1, callback f2){
         return NULL;
     pool->alive = 0;
     pool->working = 0;
-    pool->job_queue = CreateQ();
+    pool->job_queue = new_q();
     pool->size = size;
 
     //Initialize the threads
@@ -172,13 +172,14 @@ void work(threads* threads_p){
 
     while (THPOOL_ALIVE) {
 
-        condwait(threads_p->pool->job_queue->qlock);
+        if(threads_p->pool->job_queue->size < 1)
+            condwait(threads_p->pool->job_queue->qlock);
 
         pthread_mutex_lock(&(threads_p)->pool->poolmutex);
         (threads_p)->pool->working += 1;
         pthread_mutex_unlock(&(threads_p)->pool->poolmutex);
 
-        request_t *req = Dequeue((threads_p)->pool->job_queue);
+        void *req = dequeue((threads_p)->pool->job_queue);
         void* ret;
         if(req == NULL)
             condwait(threads_p->pool->job_queue->qlock);
