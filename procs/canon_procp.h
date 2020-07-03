@@ -18,14 +18,8 @@
  *    p3
  *
  * The pool(main proc) tracks all forked() procs and grows/shrinks the pool
- * as necessary. It sends instructions over pipes (die) and reads idle times
- * from it.
+ * as necessary. It rcvs idle times over signals.
  * */
-
-#define RD    0
-#define WR    1
-#define DIE   2
-#define WAIT  3
 
 typedef struct proc proc_t;
 typedef struct procs_p procs_t;
@@ -33,27 +27,26 @@ typedef struct procs_p procs_t;
 
 /*effectively the main process*/
 struct procs_p {
-    thpool_t* pool;
-
     proc_t* or;
 
-    int idle; //avg idle time for all proc
+    queue* q;
+
+    int idl; //avg idle time for all proc
+    int wrk_ttl;
+
     sock* ch; //listen socket
+
+    pid_t mpid;
 };
 
 struct proc {
     pid_t pid;
 
     int l_fd;
-    int pipe[2][2];
 
     int idl;
 
     unsigned or: 1;
-
-    pthread_mutex_t l; // locked when handling
-    pthread_cond_t c; //wake up extra thread when done handling
-    pthread_t id; //read/write thread
 
     unsigned dead:1;
     procs_t* pool;
