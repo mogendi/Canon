@@ -122,7 +122,7 @@ int poll_fd(request_t* r){
                   rht[4].name, rht[4].value,
                   rht[0].name, rht[0].value,
                   rht[1].name, rht[1].value );
-    memcpy(msg + c, body, bls-c);
+    memcpy(msg + c + 1, body, bls-c);
     return msg;
 }
 
